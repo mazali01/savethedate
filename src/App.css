@@ -1,0 +1,27 @@
+
+canvas {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+}
+#matrix { z-index: 0; }
+#hologram { z-index: 1; pointer-events: none; }
+#trail { z-index: 3; pointer-events: none; }
+.container {
+  position: relative; z-index: 2;
+  color: #00ffff; background-color: #000000C0;
+  text-align: center; font-family: 'Courier New', monospace;
+  padding: 1rem; border-radius: .5rem;
+  border-radius: 4rem;
+}
+pre { font-size: 1.5rem; line-height: 2rem; white-space: pre-wrap; }
+.add-calendar {
+  display: inline-block;
+  padding: .5rem 1rem; 
+  background: #004444;
+  color: #00ffff; text-decoration: none;
+  border: 1px solid #00ffff; transition: .3s ease;
+  transition: 'opacity 0.3s'
+}
+.add-calendar:hover { background: #006600; }
+#countdown {
+  font-size: 1.5rem; margin-top: 1rem;
+}
