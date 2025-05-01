@@ -39,7 +39,7 @@ const SecretMission = () => {
         };
         setTimeout(() => {
             revealLine();
-        }, 3000);
+        }, 1000);
 
         const updateCountdown = () => {
             const diff = weddingStartDate - new Date();
@@ -58,7 +58,6 @@ const SecretMission = () => {
 
         return () => {
             clearInterval(cdInterval);
-            URL.revokeObjectURL(blobUrl);
         };
     }, []);
 

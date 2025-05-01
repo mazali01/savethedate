@@ -1,13 +1,13 @@
 import * as THREE from 'three'
 import { Canvas, useLoader } from '@react-three/fiber'
-import { useGLTF, MeshRefractionMaterial, AccumulativeShadows, RandomizedLight, Environment, Center, PresentationControls } from '@react-three/drei'
+import { useGLTF, MeshRefractionMaterial, AccumulativeShadows, RandomizedLight, Environment, Center } from '@react-three/drei'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import { RGBELoader } from 'three-stdlib'
 import { useEffect } from 'react'
 import { useState } from 'react'
 
-function Ring({ map, ...props }) {
-    const { nodes, materials } = useGLTF('/ring-transformed.glb')
+function Ring({ map, glbUrl, ...props }) {
+    const { nodes, materials } = useGLTF(glbUrl)
     return (
         <group {...props} dispose={null}>
             <mesh geometry={nodes.diamonds.geometry}>
@@ -18,8 +18,8 @@ function Ring({ map, ...props }) {
     )
 }
 
-export default function Hologram3D() {
-    const texture = useLoader(RGBELoader, 'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/peppermint_powerplant_2_1k.hdr')
+export default function Hologram3D({ glbUrl, hdrUrl }) {
+    const texture = useLoader(RGBELoader, hdrUrl)
     texture.mapping = THREE.EquirectangularReflectionMapping;
     const [y, setY] = useState(0);
     useEffect(() => {
@@ -35,7 +35,7 @@ export default function Hologram3D() {
             <Environment map={texture} />
             <group position={[0, 3, 0]}>
                 <Center top>
-                    <Ring map={texture} rotation={[-Math.PI / 3, 0, y]} scale={3} />
+                    <Ring map={texture} rotation={[-Math.PI / 3, 0, y]} scale={3} glbUrl={glbUrl} />
                 </Center>
                 <AccumulativeShadows temporal frames={100} alphaTest={0.95} opacity={1} scale={20}>
                     <RandomizedLight amount={8} radius={10} ambient={0.5} position={[0, 10, -2.5]} bias={0.001} size={3} />
