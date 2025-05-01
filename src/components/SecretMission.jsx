@@ -39,7 +39,7 @@ const SecretMission = () => {
         };
         setTimeout(() => {
             revealLine();
-        }, 1000);
+        }, 3000);
 
         const updateCountdown = () => {
             const diff = weddingStartDate - new Date();
