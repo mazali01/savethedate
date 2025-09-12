@@ -77,7 +77,7 @@ const MatrixCanvas = () => {
     return (
         <canvas
             ref={canvasRef}
-            style={{ position: 'fixed', top: 0, left: 0, zIndex: 0 }}
+            style={{ position: 'fixed', top: 0, left: 0, zIndex: 0, opacity: 0.5, }}
         />
     );
 };
