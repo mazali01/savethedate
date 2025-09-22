@@ -1,0 +1,1099 @@
+.carpool-browser {
+    max-width: 800px;
+    margin: 0 auto;
+    direction: rtl;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 0 1rem;
+}
+
+/* Theme-consistent Search Filters */
+.search-filters-container {
+    margin-bottom: 2rem;
+    direction: rtl;
+}
+
+.search-filters-header h3 {
+    color: #00ffff;
+    text-align: center;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    direction: rtl;
+}
+
+/* Search Filters */
+.search-filters {
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    padding: 1.5rem;
+    border-radius: 15px;
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    transition: all 0.3s ease;
+    direction: rtl;
+}
+
+.search-filters:hover {
+    border-color: rgba(0, 255, 255, 0.5);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
+}
+
+.filter-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.filter-group {
+    position: relative;
+}
+
+.filter-group label {
+    display: block;
+    font-weight: 600;
+    color: #00ffff;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    text-align: right;
+    direction: rtl;
+}
+
+.filter-input,
+.filter-select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid rgba(0, 255, 255, 0.3);
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    position: relative;
+    direction: rtl;
+    text-align: right;
+}
+
+.filter-input:focus,
+.filter-select:focus {
+    border-color: #00ffff;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.4), inset 0 0 10px rgba(0, 255, 255, 0.1);
+    outline: 0;
+    background: rgba(0, 0, 0, 0.8);
+    transform: translateY(-2px);
+}
+
+.filter-input:hover,
+.filter-select:hover {
+    border-color: rgba(0, 255, 255, 0.6);
+    background: rgba(0, 0, 0, 0.7);
+    transform: translateY(-1px);
+}
+
+.filter-input::placeholder {
+    color: #888;
+    transition: color 0.3s ease;
+}
+
+.filter-input:focus::placeholder {
+    color: #aaa;
+}
+
+.filter-select {
+    cursor: pointer;
+}
+
+.filter-select option {
+    background: #000;
+    color: white;
+    padding: 0.5rem;
+}
+
+/* City Suggestions - Enhanced */
+.autocomplete-group {
+    position: relative;
+}
+
+.city-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.95);
+    border: 2px solid rgba(0, 255, 255, 0.5);
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    backdrop-filter: blur(15px);
+    box-shadow: 0 8px 32px rgba(0, 255, 255, 0.2);
+}
+
+.city-suggestion {
+    padding: 1rem 0.75rem;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(0, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    color: #ccc;
+    position: relative;
+    overflow: hidden;
+}
+
+.city-suggestion::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.city-suggestion:hover {
+    background-color: rgba(0, 255, 255, 0.2);
+    color: #00ffff;
+    transform: translateX(5px);
+    border-left: 3px solid #00ffff;
+    padding-left: 1rem;
+    box-shadow: inset 0 0 10px rgba(0, 255, 255, 0.1);
+}
+
+.city-suggestion:hover::before {
+    left: 100%;
+}
+
+.city-suggestion:last-child {
+    border-bottom: none;
+    border-radius: 0 0 10px 10px;
+}
+
+.city-suggestion:first-child:hover {
+    border-radius: 0;
+}
+
+/* Custom scrollbar for suggestions */
+.city-suggestions::-webkit-scrollbar {
+    width: 6px;
+}
+
+.city-suggestions::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 0 6px 6px 0;
+}
+
+.city-suggestions::-webkit-scrollbar-thumb {
+    background: rgba(0, 255, 255, 0.5);
+    border-radius: 3px;
+}
+
+.city-suggestions::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 255, 255, 0.7);
+}
+
+.filter-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.clear-search-button {
+    background: transparent;
+    color: #ff6b6b;
+    border: 2px solid rgba(255, 107, 107, 0.5);
+    padding: 0.6rem 1.2rem;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    position: relative;
+    overflow: hidden;
+}
+
+.clear-search-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 107, 107, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.clear-search-button:hover {
+    background: rgba(255, 107, 107, 0.15);
+    border-color: #ff6b6b;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+}
+
+.clear-search-button:hover::before {
+    left: 100%;
+}
+
+.results-counter {
+    display: flex;
+    align-items: center;
+}
+
+.results-count {
+    background: linear-gradient(45deg, rgba(0, 255, 255, 0.2), rgba(0, 255, 255, 0.1));
+    color: #00ffff;
+    padding: 0.6rem 1.2rem;
+    border-radius: 25px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    border: 2px solid rgba(0, 255, 255, 0.5);
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+    animation: pulse-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes pulse-glow {
+    from {
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+    }
+    to {
+        box-shadow: 0 0 25px rgba(0, 255, 255, 0.4);
+    }
+}
+
+.active-filters {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(0, 255, 255, 0.2);
+}
+
+.active-filters-label {
+    color: #aaa;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.filter-tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.filter-tag {
+    background: linear-gradient(45deg, rgba(0, 255, 255, 0.1), rgba(0, 255, 255, 0.2));
+    color: #00ffff;
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    border: 1px solid rgba(0, 255, 255, 0.4);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    font-weight: 500;
+}
+
+.filter-tag::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.2), transparent);
+    transition: left 0.4s ease;
+}
+
+.filter-tag:hover {
+    background: linear-gradient(45deg, rgba(0, 255, 255, 0.2), rgba(0, 255, 255, 0.3));
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 15px rgba(0, 255, 255, 0.3);
+    border-color: #00ffff;
+}
+
+.filter-tag:hover::before {
+    left: 100%;
+}
+
+.filter-tag:active {
+    transform: translateY(-1px) scale(1.02);
+}
+
+.carpool-browser h3 {
+    color: #00ffff;
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 1.5rem;
+}
+
+.carpool-browser.loading,
+.carpool-browser.empty {
+    text-align: center;
+    padding: 3rem 1rem;
+}
+
+.loading-spinner {
+    color: #00ffff;
+    font-size: 1.2rem;
+}
+
+.empty-state h3 {
+    color: #00ffff;
+    margin-bottom: 1rem;
+}
+
+.empty-state p {
+    color: #aaa;
+    font-size: 1.1rem;
+}
+
+.offers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    padding: 1rem 0;
+    direction: rtl;
+}
+
+/* Enhanced Offer Cards - Fixed for mobile */
+.offer-card {
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.6));
+    border: 2px solid rgba(0, 255, 255, 0.3);
+    border-radius: 20px;
+    padding: 1.5rem;
+    backdrop-filter: blur(15px);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    direction: rtl;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.offer-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.1), transparent);
+    transition: left 0.6s ease;
+    z-index: 1;
+}
+
+.offer-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    border-color: rgba(0, 255, 255, 0.6);
+    box-shadow: 
+        0 15px 40px rgba(0, 0, 0, 0.4),
+        0 0 30px rgba(0, 255, 255, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.offer-card:hover::before {
+    left: 100%;
+}
+
+.offer-card > * {
+    position: relative;
+    z-index: 2;
+}
+
+.offer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+    direction: rtl;
+}
+
+.driver-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+    direction: rtl;
+}
+
+.driver-photo {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid rgba(0, 255, 255, 0.5);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+    transition: all 0.3s ease;
+}
+
+.driver-photo:hover {
+    border-color: #00ffff;
+    box-shadow: 0 0 25px rgba(0, 255, 255, 0.6);
+    transform: scale(1.1);
+}
+
+/* Enhanced Route Info - RTL Fixed */
+.route-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 1rem;
+    background: linear-gradient(135deg, rgba(0, 255, 255, 0.05), rgba(0, 255, 255, 0.1));
+    border-radius: 15px;
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    direction: rtl;
+}
+
+.route-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 80px;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.route-item:hover {
+    transform: translateY(-2px);
+    background: rgba(0, 0, 0, 0.5);
+    box-shadow: 0 4px 15px rgba(0, 255, 255, 0.2);
+}
+
+.route-label {
+    font-size: 0.8rem;
+    color: #aaa;
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+}
+
+.route-value {
+    color: white;
+    font-weight: 700;
+    text-align: center;
+    font-size: 0.9rem;
+    direction: rtl;
+}
+
+.route-arrow {
+    color: #00ffff;
+    font-size: 1.5rem;
+    margin: 0 0.5rem;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+    animation: pulse-arrow 2s ease-in-out infinite;
+    transform: scaleX(-1); /* Flip arrow for RTL */
+}
+
+@keyframes pulse-arrow {
+    0%, 100% {
+        transform: scale(1);
+        text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+    }
+    50% {
+        transform: scale(1.1);
+        text-shadow: 0 0 20px rgba(0, 255, 255, 1);
+    }
+}
+
+/* Enhanced Offer Details */
+.offer-details {
+    margin-bottom: 1.5rem;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    color: #ccc;
+    border-bottom: 1px solid rgba(0, 255, 255, 0.1);
+    transition: all 0.2s ease;
+}
+
+.detail-item:hover {
+    color: white;
+    background: rgba(0, 255, 255, 0.05);
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    border-radius: 8px;
+    border-bottom-color: rgba(0, 255, 255, 0.3);
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: #00ffff;
+}
+
+.available-seats {
+    color: #4ade80;
+    font-weight: 700;
+    text-shadow: 0 0 5px rgba(74, 222, 128, 0.5);
+}
+
+.full-seats {
+    color: #f87171;
+    font-weight: 700;
+    text-shadow: 0 0 5px rgba(248, 113, 113, 0.5);
+}
+
+.offer-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+}
+
+/* Enhanced Action Buttons */
+.contact-button {
+    background: linear-gradient(135deg, rgba(37, 211, 102, 0.8), rgba(37, 211, 102, 0.6));
+    color: white;
+    border: 2px solid rgba(37, 211, 102, 0.5);
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    position: relative;
+    overflow: hidden;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.contact-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.contact-button:hover {
+    background: linear-gradient(135deg, rgba(37, 211, 102, 1), rgba(37, 211, 102, 0.8));
+    border-color: rgba(37, 211, 102, 0.8);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(37, 211, 102, 0.4);
+}
+
+.contact-button:hover::before {
+    left: 100%;
+}
+
+/* Enhanced Offer Meta */
+.offer-meta {
+    text-align: center;
+    border-top: 1px solid rgba(0, 255, 255, 0.2);
+    padding-top: 1rem;
+    margin-top: 1rem;
+}
+
+.created-date {
+    color: #888;
+    font-size: 0.8rem;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    border: 1px solid rgba(136, 136, 136, 0.3);
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.created-date:hover {
+    color: #aaa;
+    border-color: rgba(170, 170, 170, 0.5);
+    background: rgba(0, 0, 0, 0.5);
+}
+
+/* Enhanced Loading and Empty States */
+.loading-message,
+.no-offers-message {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #00ffff;
+    font-size: 1.2rem;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.6));
+    border-radius: 20px;
+    border: 2px solid rgba(0, 255, 255, 0.3);
+    backdrop-filter: blur(15px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.empty-state h3 {
+    color: #00ffff;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.empty-state p {
+    color: #aaa;
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+/* Enhanced Responsive Design - Fixed for mobile */
+@media (max-width: 768px) {
+    .carpool-browser {
+        padding: 0 0.5rem;
+    }
+    
+    .filter-row {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
+    .filter-actions {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .clear-search-button {
+        align-self: center;
+        width: fit-content;
+        margin: 0 auto;
+    }
+    
+    .offers-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 0.5rem 0;
+        margin: 0;
+    }
+    
+    .offer-card {
+        padding: 1rem;
+        margin: 0;
+        border-radius: 15px;
+        max-width: 100%;
+        overflow: hidden;
+    }
+    
+    .offer-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+        text-align: center;
+    }
+    
+    .driver-info {
+        justify-content: center;
+        flex-direction: column;
+        text-align: center;
+        direction: rtl;
+    }
+    
+    .driver-photo {
+        align-self: center;
+        width: 50px;
+        height: 50px;
+    }
+    
+    .seats-info {
+        text-align: center;
+    }
+    
+    .route-info {
+        justify-content: center;
+        padding: 0.75rem 0.5rem;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .route-item {
+        min-width: 70px;
+        padding: 0.4rem 0.3rem;
+        font-size: 0.85rem;
+    }
+    
+    .route-arrow {
+        font-size: 1.2rem;
+        margin: 0 0.25rem;
+    }
+    
+    .timing-info {
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 0.5rem;
+    }
+    
+    .time-item {
+        flex-direction: row;
+        justify-content: space-between;
+        background: rgba(0, 0, 0, 0.4);
+        padding: 0.5rem;
+        border-radius: 8px;
+        direction: rtl;
+    }
+    
+    .offer-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+        direction: rtl;
+    }
+    
+    .contact-button,
+    .request-button {
+        width: 100%;
+        justify-content: center;
+        padding: 0.75rem;
+    }
+    
+    .filter-tags {
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .filter-tag {
+        font-size: 0.8rem;
+        padding: 0.3rem 0.8rem;
+    }
+    
+    .loading-message,
+    .no-offers-message {
+        padding: 2rem 1rem;
+        margin: 0;
+    }
+    
+    .search-filters {
+        padding: 1rem;
+        margin: 0 0.25rem 1.5rem 0.25rem;
+    }
+}
+
+/* Extra small screens - Prevent horizontal scroll */
+@media (max-width: 480px) {
+    .carpool-browser {
+        padding: 0 0.25rem;
+        max-width: 100vw;
+        overflow-x: hidden;
+    }
+    
+    .offer-card {
+        padding: 0.75rem;
+        margin: 0;
+        width: 100%;
+        min-width: 0;
+    }
+    
+    .route-info {
+        gap: 0.25rem;
+        padding: 0.5rem;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .route-item {
+        min-width: 60px;
+        padding: 0.3rem;
+        margin: 0.25rem 0;
+    }
+    
+    .route-arrow {
+        font-size: 1rem;
+        margin: 0.25rem 0;
+        transform: scaleX(-1) rotate(90deg);
+    }
+    
+    .filter-actions {
+        gap: 0.75rem;
+    }
+    
+    .search-filters {
+        padding: 0.75rem;
+        margin: 0 0 1.5rem 0;
+    }
+    
+    .offers-grid {
+        gap: 0.75rem;
+    }
+    
+    .driver-details h4 {
+        font-size: 1rem;
+    }
+    
+    .seats-count {
+        font-size: 0.8rem;
+        padding: 0.2rem 0.6rem;
+    }
+}
+
+/* Prevent horizontal overflow globally */
+.carpool-browser,
+.carpool-browser * {
+    box-sizing: border-box;
+    max-width: 100%;
+}
+
+.driver-details h4 {
+    color: #00ffff;
+    margin: 0 0 0.25rem 0;
+    font-size: 1.1rem;
+    text-align: right;
+    direction: rtl;
+}
+
+.phone-number {
+    color: #aaa;
+    font-size: 0.9rem;
+    display: block;
+    text-align: right;
+    direction: ltr;
+}
+
+.seats-info {
+    text-align: left;
+    direction: rtl;
+}
+
+.seats-count {
+    background: rgba(0, 255, 0, 0.2);
+    color: #00ff00;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.seats-count.full {
+    background: rgba(255, 0, 0, 0.2);
+    color: #ff6b6b;
+}
+
+.route-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.route-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 80px;
+}
+
+.route-label {
+    font-size: 0.8rem;
+    color: #aaa;
+    margin-bottom: 0.25rem;
+}
+
+.route-value {
+    color: white;
+    font-weight: 600;
+    text-align: center;
+}
+
+.route-arrow {
+    color: #00ffff;
+    font-size: 1.2rem;
+    margin: 0 0.5rem;
+}
+
+.timing-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    direction: rtl;
+}
+
+.time-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.time-label {
+    font-size: 0.8rem;
+    color: #aaa;
+    margin-bottom: 0.25rem;
+}
+
+.time-value {
+    color: white;
+    font-weight: 500;
+}
+
+.additional-info {
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border-right: 3px solid #00ffff;
+    direction: rtl;
+}
+
+.additional-info p {
+    color: #ddd;
+    margin: 0;
+    font-style: italic;
+    text-align: right;
+    direction: rtl;
+}
+
+.passengers-info {
+    margin-bottom: 1rem;
+    direction: rtl;
+}
+
+.current-passengers h5 {
+    color: #00ffff;
+    margin: 0 0 0.5rem 0;
+    font-size: 0.9rem;
+    text-align: right;
+    direction: rtl;
+}
+
+.current-passengers ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    direction: rtl;
+}
+
+.current-passengers li {
+    color: #aaa;
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    text-align: right;
+    direction: rtl;
+}
+
+.offer-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.contact-button,
+.request-button {
+    flex: 1;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.contact-button {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.contact-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.request-button {
+    background: linear-gradient(45deg, #00ffff, #0099cc);
+    color: black;
+}
+
+.request-button:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 255, 255, 0.3);
+}
+
+.request-button:disabled {
+    background: #666;
+    color: #aaa;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.request-button.disabled {
+    background: #444;
+    color: #888;
+}
+
+.offer-meta {
+    text-align: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 0.75rem;
+}
+
+.created-date {
+    color: #888;
+    font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+    .offers-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .offer-card {
+        padding: 1rem;
+    }
+    
+    .offer-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    
+    .driver-info {
+        justify-content: flex-start;
+    }
+    
+    .seats-info {
+        text-align: right;
+    }
+    
+    .route-info {
+        justify-content: center;
+    }
+    
+    .timing-info {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .time-item {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+    
+    .offer-actions {
+        flex-direction: column;
+    }
+}

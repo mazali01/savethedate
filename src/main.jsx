@@ -1,8 +1,21 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { QueryClient, QueryClientProvider } from 'react-query'
 import './index.css'
 import App from './App.jsx'
 import RingRecorder from './components/RingRecorder.jsx'
+
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      cacheTime: 1000 * 60 * 30, // 30 minutes
+      retry: 2,
+      refetchOnWindowFocus: false,
+    },
+  },
+})
 
 function RecorderEntry() {
   return (
@@ -14,6 +27,8 @@ const isRecorder = typeof window !== 'undefined' && window.location.pathname ===
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    {isRecorder ? <RecorderEntry /> : <App />}
+    <QueryClientProvider client={queryClient}>
+      {isRecorder ? <RecorderEntry /> : <App />}
+    </QueryClientProvider>
   </StrictMode>,
 )

@@ -27,18 +27,18 @@ const NavPage = () => {
 
     return (
         <PageTemplate title="הוראות הגעה 📍">
-            <Box sx={{ textAlign: 'center', color: '#00ffff' }}>
-                <Typography variant="h6" sx={{ mb: 1.5, color: '#00ffff', fontSize: '1.1rem' }}>
+            <Box sx={{ textAlign: 'center', color: '#2c2c2c' }}>
+                <Typography variant="h6" sx={{ mb: 1.5, color: '#2e7d32', fontSize: '1.1rem' }}>
                     {weddingLocation}
                 </Typography>
 
-                <Typography variant="body1" sx={{ mb: 2, color: '#ffffff', fontSize: '0.9rem' }}>
+                <Typography variant="body1" sx={{ mb: 2, color: '#555555', fontSize: '0.9rem' }}>
                     {weddingAddress}
                 </Typography>
 
-                <Divider sx={{ my: 2, borderColor: 'rgba(0, 255, 255, 0.3)' }} />
+                <Divider sx={{ my: 2, borderColor: 'rgba(46, 125, 50, 0.3)' }} />
 
-                <Typography variant="h6" sx={{ mb: 1.5, color: '#00ffff', fontSize: '1rem' }}>
+                <Typography variant="h6" sx={{ mb: 1.5, color: '#2e7d32', fontSize: '1rem' }}>
                     בחרו את אפליקציית הניווט המועדפת עליכם:
                 </Typography>
 
@@ -48,9 +48,9 @@ const NavPage = () => {
                         size="large"
                         onClick={openWaze}
                         sx={{
-                            backgroundColor: '#00c882',
+                            backgroundColor: '#2e7d32',
                             '&:hover': {
-                                backgroundColor: '#00a571',
+                                backgroundColor: '#1b5e20',
                             },
                             color: '#ffffff',
                             fontSize: '1.1rem',
@@ -65,9 +65,9 @@ const NavPage = () => {
                         size="large"
                         onClick={openGoogleMaps}
                         sx={{
-                            backgroundColor: '#00c882',
+                            backgroundColor: '#2e7d32',
                             '&:hover': {
-                                backgroundColor: '#00a571',
+                                backgroundColor: '#1b5e20',
                             },
                             color: '#ffffff',
                             fontSize: '1.1rem',
@@ -82,9 +82,9 @@ const NavPage = () => {
                         size="large"
                         onClick={openAppleMaps}
                         sx={{
-                            backgroundColor: '#00c882',
+                            backgroundColor: '#2e7d32',
                             '&:hover': {
-                                backgroundColor: '#00a571',
+                                backgroundColor: '#1b5e20',
                             },
                             color: '#ffffff',
                             fontSize: '1.1rem',
@@ -95,21 +95,21 @@ const NavPage = () => {
                     </Button>
                 </Box>
 
-                <Divider sx={{ my: 3, borderColor: 'rgba(0, 255, 255, 0.3)' }} />
+                <Divider sx={{ my: 3, borderColor: 'rgba(46, 125, 50, 0.3)' }} />
 
                 <Paper
                     elevation={2}
                     sx={{
                         p: 2,
                         mt: 2,
-                        backgroundColor: 'rgba(0, 255, 255, 0.1)',
-                        border: '1px solid rgba(0, 255, 255, 0.2)'
+                        backgroundColor: 'rgba(46, 125, 50, 0.1)',
+                        border: '1px solid rgba(46, 125, 50, 0.2)'
                     }}
                 >
-                    <Typography variant="body2" sx={{ color: '#ffffff', mb: 1 }}>
+                    <Typography variant="body2" sx={{ color: '#2c2c2c', mb: 1 }}>
                         🅿️ <strong>חניה:</strong> יש חנייה מול מיקום החתונה
                     </Typography>
-                    <Typography variant="body2" sx={{ color: '#ffffff', fontSize: '0.9rem' }}>
+                    <Typography variant="body2" sx={{ color: '#555555', fontSize: '0.9rem' }}>
                         ⚠️ <strong>חשוב:</strong> קחו איתכם את כרטיס החניה לחתימה
                     </Typography>
                 </Paper>

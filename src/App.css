@@ -18,15 +18,21 @@ pre {
 .add-calendar {
   display: inline-block;
   padding: .5rem 1rem; 
-  background: #004444;
-  color: #00ffff; text-decoration: none;
-  border: 1px solid #00ffff; transition: .3s ease;
-  transition: 'opacity 0.3s'
+  background: #e8f5e8;
+  color: #2e7d32; 
+  text-decoration: none;
+  border: 2px solid #2e7d32; 
+  transition: .3s ease;
+  border-radius: 8px;
 }
-.add-calendar:hover { background: #006600; }
+.add-calendar:hover { 
+  background: #2e7d32; 
+  color: #ffffff;
+}
 #countdown {
   font-size: 1.5rem; 
   margin-top: 1rem;
   direction: rtl;
   text-align: center;
+  color: #2c2c2c;
 }

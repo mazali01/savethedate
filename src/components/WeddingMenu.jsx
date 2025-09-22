@@ -10,7 +10,7 @@ const MENU_ITEMS = [
     { key: 'gifts', label: 'פה מפנקים אותנו במתנה', emoji: '🎁', href: '/gifts' },
     { key: 'menuImages', label: 'מתלבטים מה לאכול?', emoji: '🍽️', href: '/menu' },
     { key: 'song', label: 'תצביעו לשיר הבא', emoji: '🎶', href: '/songs' },
-    { key: 'album', label: 'כאן מעלים תמונות', emoji: '📸', href: '/album' },
+    { key: 'album', label: 'כאן מעלים תמונות', emoji: '📸', href: 'https://photos.google.com/share/AF1QipMGz2_kVYdc8AoDk7hRvFTW2OIe2CUQYfEVLMPljNqgSQ8e8IEN1nzYPGuXeg0IpQ?pli=1&key=THlxVFhOdWNiMmxHZWxfUW9nbDhqX1NFZDJ1WlRR' },
     { key: 'carpool', label: 'מחפשים/נותנים טרמפ?', emoji: '🚗', href: '/carpool' },
     { key: 'singles', label: 'רווקים? בואו להכיר', emoji: '💬', href: '/singles' },
 ];
@@ -39,7 +39,7 @@ const WeddingMenu = () => {
             alignItems: 'center',
             overflow: 'hidden' // Prevent main container scroll
         }}>
-            <h2 style={{ color: '#00ffff', margin: '1em 0', flexShrink: 0 }}>ערן & מזל מתחתנים</h2>
+            <h2 style={{ color: '#2e7d32', margin: '1em 0', flexShrink: 0 }}>ערן & מזל מתחתנים</h2>
 
             {/* Scrollable grid container */}
             <div style={{
@@ -51,7 +51,7 @@ const WeddingMenu = () => {
                 overflowX: 'hidden',
                 // Custom scrollbar styling
                 scrollbarWidth: 'thin',
-                scrollbarColor: 'rgba(0,255,255,0.5) rgba(0,0,0,0.1)',
+                scrollbarColor: 'rgba(46,125,50,0.5) rgba(0,0,0,0.1)',
             }}>
                 {MENU_ITEMS.map(item => (
                     <MenuCard
@@ -88,15 +88,15 @@ const MenuCard = ({ href, emoji, label, onClick }) => {
                 gap: '0.5em',
                 fontSize: '1rem',
                 borderRadius: '0.75em',
-                border: '1px solid rgba(0,255,255,0.2)',
-                background: 'rgba(0,200,130,0.5)',
-                color: '#fff',
+                border: '2px solid rgba(46,125,50,0.3)',
+                background: 'rgba(255,255,255,0.9)',
+                color: '#2c2c2c',
                 cursor: href ? 'pointer' : 'default',
                 transition: 'transform 0.2s ease, box-shadow 0.2s ease',
             }}
             onMouseEnter={(e) => {
                 e.target.style.transform = 'scale(1.05)';
-                e.target.style.boxShadow = '0 4px 20px rgba(0,255,255,0.3)';
+                e.target.style.boxShadow = '0 4px 20px rgba(46,125,50,0.4)';
             }}
             onMouseLeave={(e) => {
                 e.target.style.transform = 'scale(1)';

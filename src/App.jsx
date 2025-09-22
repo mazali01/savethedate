@@ -5,8 +5,8 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { AnimatePresence, motion } from 'framer-motion';
 
-import MatrixCanvas from './components/MatrixCanvas';
 import RingVideo from './components/RingVideo';
+import WhiteCurtain from './components/WhiteCurtain';
 import WeddingMenu from './components/WeddingMenu';
 
 // Pages
@@ -15,29 +15,30 @@ import NavPage from './pages/NavPage';
 import GiftsPage from './pages/GiftsPage';
 import MenuPage from './pages/MenuPage';
 import SongsPage from './pages/SongsPage';
-import AlbumPage from './pages/AlbumPage';
 import CarpoolPage from './pages/CarpoolPage';
 import SinglesPage from './pages/SinglesPage';
+import AdminPage from './pages/AdminPage';
 
-const darkTheme = createTheme({
+const lightTheme = createTheme({
   palette: {
-    mode: 'dark',
+    mode: 'light',
     primary: {
-      main: '#00ffff',
+      main: '#2e7d32', // Forest green
     },
     secondary: {
-      main: '#00c882',
+      main: '#d32f2f', // Elegant red
     },
     background: {
-      default: '#000000',
-      paper: 'rgba(0, 200, 130, 0.1)',
+      default: '#fafafa',
+      paper: 'rgba(46, 125, 50, 0.05)', // Light green tint
     },
     text: {
-      primary: '#00ffff',
+      primary: '#2c2c2c', // Dark gray for readability
+      secondary: '#555555',
     },
   },
   typography: {
-    fontFamily: 'monospace',
+    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
   },
 });
 
@@ -90,9 +91,9 @@ const AnimatedRoutes = () => {
               <Route path="/gifts" element={<GiftsPage />} />
               <Route path="/menu" element={<MenuPage />} />
               <Route path="/songs" element={<SongsPage />} />
-              <Route path="/album" element={<AlbumPage />} />
               <Route path="/carpool" element={<CarpoolPage />} />
               <Route path="/singles" element={<SinglesPage />} />
+              <Route path="/admin" element={<AdminPage />} />
             </Routes>
           </div>
         </motion.div>
@@ -103,16 +104,14 @@ const AnimatedRoutes = () => {
 
 function App() {
   return (
-    <ThemeProvider theme={darkTheme}>
+    <ThemeProvider theme={lightTheme}>
       <CssBaseline />
       <Router>
         <>
           {/* Background layers - always visible */}
-          <div style={{ position: 'fixed', top: 0, left: 0, zIndex: 0, width: '100%', height: '100%', backgroundColor: '#000' }} >
-            <MatrixCanvas />
-          </div>
+          <WhiteCurtain />
           <div style={{ position: 'fixed', top: -25, left: 0, zIndex: 1, width: '100%' }}>
-            <RingVideo src="/ring-loop.webm" />
+            <RingVideo />
           </div>
 
           {/* Animated Routes */}

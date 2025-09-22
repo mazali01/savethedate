@@ -123,11 +123,11 @@ export default function RingRecorder({
     }, [sceneReady, oneRevComplete, glbUrl, hdrUrl, secondsPerRevolution, fps, width, height, mimeType, frames, onReady])
 
     return (
-        <div ref={canvasContainerRef} style={{ width, height, background: 'transparent' }}>
+        <div ref={canvasContainerRef} style={{ width, height, background: '#000000' }}>
             <Hologram3D
                 glbUrl={glbUrl}
                 hdrUrl={hdrUrl}
-                transparent
+                transparent={false}
                 secondsPerRevolution={secondsPerRevolution}
                 onReady={() => setSceneReady(true)}
                 onOneRev={() => setOneRevComplete(true)}

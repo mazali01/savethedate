@@ -36,15 +36,15 @@ const MatrixCanvas = () => {
         setupCanvas();
 
         const drawFrame = (timestamp) => {
-            // clear with slight opacity for trailing effect
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            // clear with white background and slight opacity for trailing effect
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
             ctx.fillRect(0, 0, width, height);
 
             if (timestamp - lastTime > dropInterval) {
                 // update drops
                 for (let i = 0; i < columns; i++) {
                     const emoji = emojis[Math.floor(Math.random() * emojis.length)];
-                    ctx.fillStyle = '#0F0';
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.8)'; // Dark text for visibility on white
                     ctx.font = `${fontSize}px monospace`;
                     ctx.fillText(emoji, i * fontSize, drops[i] * fontSize);
 
@@ -77,7 +77,14 @@ const MatrixCanvas = () => {
     return (
         <canvas
             ref={canvasRef}
-            style={{ position: 'fixed', top: 0, left: 0, zIndex: 0, opacity: 0.5, }}
+            style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                zIndex: 0,
+                opacity: 0.9,
+                backgroundColor: 'white'
+            }}
         />
     );
 };
