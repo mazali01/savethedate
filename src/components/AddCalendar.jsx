@@ -88,7 +88,7 @@ END:VCALENDAR
                 <button onClick={handleOutlook} className="add-calendar">הוסף ל-Outlook</button>
                 <button onClick={handleICSDownload} className="add-calendar">הורדה ליומן Apple</button>
             </div>
-            <div style={{ color: '#00ffff', fontSize: '0.8rem' }}>{countdown}</div>
+            <div style={{ color: '#008f8f', fontSize: '1.2rem' }}>{countdown}</div>
         </div>
     );
 };

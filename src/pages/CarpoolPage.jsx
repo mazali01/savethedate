@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import PageTemplate from '../components/PageTemplate';
 import CarpoolOfferForm from '../components/carpool/CarpoolOfferForm';
-import CarpoolRequestBrowser from '../components/carpool/CarpoolRequestBrowser';
+import CarpoolBrowser from '../components/carpool/CarpoolBrowser';
 import './CarpoolPage.css';
 
 const CarpoolPage = () => {
+    const { userId } = useParams();
     const [currentView, setCurrentView] = useState('browse'); // 'browse' or 'offer'
 
     const handleOfferCreated = (offer) => {
@@ -17,13 +19,14 @@ const CarpoolPage = () => {
             case 'offer':
                 return (
                     <CarpoolOfferForm
+                        userId={userId}
                         onOfferCreated={handleOfferCreated}
                         onCancel={() => setCurrentView('browse')}
                     />
                 );
             case 'browse':
             default:
-                return <CarpoolRequestBrowser />;
+                return <CarpoolBrowser userId={userId} />;
         }
     };
 

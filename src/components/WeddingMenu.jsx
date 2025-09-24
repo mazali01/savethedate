@@ -1,22 +1,33 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import CalendarButtons from './AddCalendar';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import WelcomeConfetti from './WelcomeConfetti';
 
-const weddingStartDate = new Date('2025-10-16T19:00:00');
-
-const MENU_ITEMS = [
-    { key: 'rsvp', label: 'כמה תהיו?', emoji: '✅', href: '/rsvp' },
-    { key: 'nav', label: 'הוראות הגעה (Waze/Google)', emoji: '📍', href: '/nav' },
-    { key: 'gifts', label: 'פה מפנקים אותנו במתנה', emoji: '🎁', href: '/gifts' },
-    { key: 'menuImages', label: 'מתלבטים מה לאכול?', emoji: '🍽️', href: '/menu' },
-    { key: 'song', label: 'תצביעו לשיר הבא', emoji: '🎶', href: '/songs' },
-    { key: 'album', label: 'כאן מעלים תמונות', emoji: '📸', href: 'https://photos.google.com/share/AF1QipMGz2_kVYdc8AoDk7hRvFTW2OIe2CUQYfEVLMPljNqgSQ8e8IEN1nzYPGuXeg0IpQ?pli=1&key=THlxVFhOdWNiMmxHZWxfUW9nbDhqX1NFZDJ1WlRR' },
-    { key: 'carpool', label: 'מחפשים/נותנים טרמפ?', emoji: '🚗', href: '/carpool' },
-    { key: 'singles', label: 'רווקים? בואו להכיר', emoji: '💬', href: '/singles' },
-];
+// In-memory variable to track if confetti has been shown
+let confettiShown = false;
 
 const WeddingMenu = () => {
     const navigate = useNavigate();
+    const { userId } = useParams();
+    const [showConfetti, setShowConfetti] = useState(false);
+
+    // Check if confetti has been shown using in-memory variable
+    useEffect(() => {
+        if (!confettiShown) {
+            setShowConfetti(true);
+            confettiShown = true;
+        }
+    }, []);
+
+    const MENU_ITEMS = [
+        { key: 'nav', label: 'הוראות הגעה (Waze/Google)', emoji: '📍', href: `/user/${userId}/nav` },
+        { key: 'carpool', label: 'מחפשים/נותנים טרמפ?', emoji: '🚗', href: `/user/${userId}/carpool` },
+        { key: 'song', label: 'תצביעו לשיר הבא', emoji: '🎶', href: `/user/${userId}/songs` },
+        { key: 'album', label: 'כאן מעלים תמונות', emoji: '📸', href: 'https://photos.google.com/share/AF1QipMGz2_kVYdc8AoDk7hRvFTW2OIe2CUQYfEVLMPljNqgSQ8e8IEN1nzYPGuXeg0IpQ?pli=1&key=THlxVFhOdWNiMmxHZWxfUW9nbDhqX1NFZDJ1WlRR' },
+        { key: 'menuImages', label: 'מתלבטים מה לאכול?', emoji: '🍽️', href: `/user/${userId}/menu` },
+        { key: 'singles', label: 'רווקים? בואו להכיר', emoji: '💬', href: `/user/${userId}/singles` },
+        { key: 'gifts', label: 'פה מפנקים אותנו במתנה', emoji: '🎁', href: `/user/${userId}/gifts` },
+        { key: 'rsvp-update', label: 'עדכון אישור הגעה', emoji: '✏️', href: `/rsvp/${userId}` },
+    ];
 
     const handleCardClick = (href) => {
         if (!href) return;
@@ -24,7 +35,12 @@ const WeddingMenu = () => {
         if (isExternal) {
             window.open(href, '_blank');
         } else {
-            navigate(href);
+            // If navigating to RSVP, pass state to indicate coming from menu
+            if (href.includes('/rsvp/')) {
+                navigate(href, { state: { fromMenu: true } });
+            } else {
+                navigate(href);
+            }
         }
     };
 
@@ -34,19 +50,28 @@ const WeddingMenu = () => {
             height: '100%',
             textAlign: 'center',
             display: 'flex',
-            padding: '0',
+            padding: '0.5em',
+            marginTop: '2em',
             flexDirection: 'column',
             alignItems: 'center',
             overflow: 'hidden' // Prevent main container scroll
         }}>
-            <h2 style={{ color: '#2e7d32', margin: '1em 0', flexShrink: 0 }}>ערן & מזל מתחתנים</h2>
+            {/* Confetti only on wedding menu page and only once per refresh */}
+            {showConfetti && <WelcomeConfetti />}
+
+            <h2 style={{ color: '#1eadc2', margin: '0' }}>מזל & ערן</h2>
+            <h3 style={{ color: '#1eadc2', margin: '0' }}>מתחתנים</h3>
 
             {/* Scrollable grid container */}
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                alignContent: 'start',
                 gap: '1em',
+                height: '100%',
                 width: '100%',
+                maxWidth: '600px',
+                marginTop: '2em',
                 overflowY: 'auto',
                 overflowX: 'hidden',
                 // Custom scrollbar styling
@@ -63,14 +88,6 @@ const WeddingMenu = () => {
                     />
                 ))}
             </div>
-
-            <CalendarButtons event={{
-                title: 'החתונה של ערן & מזל',
-                description: 'החתונה של ערן & מזל',
-                location: 'הבית, רעננה',
-                start: weddingStartDate,
-                end: new Date('2025-10-17T03:00:00'),
-            }} />
         </div>
     );
 };
@@ -84,6 +101,7 @@ const MenuCard = ({ href, emoji, label, onClick }) => {
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
+                justifyContent: 'center',
                 padding: '0.75em',
                 gap: '0.5em',
                 fontSize: '1rem',
@@ -93,6 +111,9 @@ const MenuCard = ({ href, emoji, label, onClick }) => {
                 color: '#2c2c2c',
                 cursor: href ? 'pointer' : 'default',
                 transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                minHeight: '100px',
+                height: 'auto',
+                width: '100%',
             }}
             onMouseEnter={(e) => {
                 e.target.style.transform = 'scale(1.05)';

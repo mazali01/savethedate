@@ -27,7 +27,7 @@ const NavPage = () => {
 
     return (
         <PageTemplate title="הוראות הגעה 📍">
-            <Box sx={{ textAlign: 'center', color: '#2c2c2c' }}>
+            <Box sx={{ width: '100%', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <Typography variant="h6" sx={{ mb: 1.5, color: '#2e7d32', fontSize: '1.1rem' }}>
                     {weddingLocation}
                 </Typography>
@@ -39,7 +39,7 @@ const NavPage = () => {
                 <Divider sx={{ my: 2, borderColor: 'rgba(46, 125, 50, 0.3)' }} />
 
                 <Typography variant="h6" sx={{ mb: 1.5, color: '#2e7d32', fontSize: '1rem' }}>
-                    בחרו את אפליקציית הניווט המועדפת עליכם:
+                    :בחרו את אפליקציית הניווט המועדפת עליכם
                 </Typography>
 
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mt: 2 }}>
@@ -55,9 +55,17 @@ const NavPage = () => {
                             color: '#ffffff',
                             fontSize: '1.1rem',
                             padding: '12px 24px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1,
                         }}
                     >
-                        🚗 פתח ב-Waze
+                        <img
+                            src="https://www.waze.com/favicon.ico"
+                            alt="Waze"
+                            style={{ width: '20px', height: '20px' }}
+                        />
+                        פתח ב-Waze
                     </Button>
 
                     <Button
@@ -72,9 +80,17 @@ const NavPage = () => {
                             color: '#ffffff',
                             fontSize: '1.1rem',
                             padding: '12px 24px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1,
                         }}
                     >
-                        🗺️ פתח ב-Google Maps
+                        <img
+                            src="https://maps.google.com/favicon.ico"
+                            alt="Google Maps"
+                            style={{ width: '20px', height: '20px' }}
+                        />
+                        פתח ב-Google Maps
                     </Button>
 
                     <Button
@@ -89,9 +105,17 @@ const NavPage = () => {
                             color: '#ffffff',
                             fontSize: '1.1rem',
                             padding: '12px 24px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1,
                         }}
                     >
-                        🍎 פתח ב-Apple Maps
+                        <img
+                            src="https://www.apple.com/favicon.ico"
+                            alt="Apple Maps"
+                            style={{ width: '20px', height: '20px' }}
+                        />
+                        פתח ב-Apple Maps
                     </Button>
                 </Box>
 

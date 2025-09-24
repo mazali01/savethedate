@@ -1,33 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { subscribeToCarpoolOffers, addPassengerToOffer } from '../../services/carpoolService.js';
-import { getCurrentUser } from '../../utils/deviceId.js';
+import { subscribeToCarpoolOffers } from '../../services/carpoolService.js';
 import { filterCities } from '../../data/cities.js';
 import './CarpoolBrowser.css';
 
-const CarpoolBrowser = ({ onRequestRide }) => {
+const CarpoolBrowser = ({ userId }) => {
     const [offers, setOffers] = useState([]);
     const [filteredOffers, setFilteredOffers] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [contacting, setContacting] = useState({});
-    const [currentUser, setCurrentUser] = useState(null);
-
-    // Filter states
-    const [filters, setFilters] = useState({
+    const [searchFilters, setSearchFilters] = useState({
         fromCity: '',
-        toCity: '',
-        departureTime: '',
-        availableSeats: ''
+        minSeats: ''
     });
-
-    // City suggestions for autocomplete
     const [fromCitySuggestions, setFromCitySuggestions] = useState([]);
-    const [toCitySuggestions, setToCitySuggestions] = useState([]);
 
     useEffect(() => {
-        // Get current user
-        setCurrentUser(getCurrentUser());
-
-        // Subscribe to real-time offers
         const unsubscribe = subscribeToCarpoolOffers((offersData) => {
             setOffers(offersData);
             setFilteredOffers(offersData);
@@ -37,55 +23,34 @@ const CarpoolBrowser = ({ onRequestRide }) => {
         return () => unsubscribe();
     }, []);
 
-    // Filter offers based on current filters
+    // Filter offers based on search criteria
     useEffect(() => {
-        let filtered = offers;
+        let filtered = offers.filter(offer => {
+            const matchesFromCity = !searchFilters.fromCity ||
+                offer.fromCity.toLowerCase().includes(searchFilters.fromCity.toLowerCase());
+            const matchesMinSeats = !searchFilters.minSeats ||
+                offer.availableSeats >= parseInt(searchFilters.minSeats);
 
-        if (filters.fromCity) {
-            filtered = filtered.filter(offer =>
-                offer.fromCity?.toLowerCase().includes(filters.fromCity.toLowerCase())
-            );
-        }
-
-        if (filters.toCity) {
-            filtered = filtered.filter(offer =>
-                offer.toCity?.toLowerCase().includes(filters.toCity.toLowerCase())
-            );
-        }
-
-        if (filters.departureTime) {
-            filtered = filtered.filter(offer =>
-                offer.departureTime?.includes(filters.departureTime)
-            );
-        }
-
-        if (filters.availableSeats) {
-            const minSeats = parseInt(filters.availableSeats);
-            filtered = filtered.filter(offer =>
-                offer.availableSeats >= minSeats
-            );
-        }
+            return matchesFromCity && matchesMinSeats;
+        });
 
         setFilteredOffers(filtered);
-    }, [offers, filters]);
+    }, [offers, searchFilters]);
 
-    const handleFilterChange = (field, value) => {
-        setFilters(prev => ({
+    const handleSearchChange = (field, value) => {
+        setSearchFilters(prev => ({
             ...prev,
             [field]: value
         }));
 
         // Handle city autocomplete
         if (field === 'fromCity') {
-            setFromCitySuggestions(value ? filterCities(value) : []);
-        }
-        if (field === 'toCity') {
-            setToCitySuggestions(value ? filterCities(value) : []);
+            setFromCitySuggestions(filterCities(value));
         }
     };
 
     const handleCitySelect = (city, field) => {
-        setFilters(prev => ({
+        setSearchFilters(prev => ({
             ...prev,
             [field]: city
         }));
@@ -93,370 +58,265 @@ const CarpoolBrowser = ({ onRequestRide }) => {
         if (field === 'fromCity') {
             setFromCitySuggestions([]);
         }
-        if (field === 'toCity') {
-            setToCitySuggestions([]);
-        }
     };
 
     const clearFilters = () => {
-        setFilters({
+        setSearchFilters({
             fromCity: '',
-            toCity: '',
-            departureTime: '',
-            availableSeats: ''
+            minSeats: ''
         });
         setFromCitySuggestions([]);
-        setToCitySuggestions([]);
     };
 
-    const hasActiveFilters = Object.values(filters).some(filter => filter !== '');
-
     const handleContactDriver = (offer) => {
-        if (!currentUser.name || !currentUser.phoneNumber) {
-            // If user info is not complete, show form to get it
-            const name = prompt('מה השם שלך?');
-            const phone = prompt('מה מספר הטלפון שלך?');
-
-            if (!name || !phone) {
-                return;
-            }
-
-            const { setUserInfo } = require('../../utils/deviceId.js');
-            setUserInfo({ name, phoneNumber: phone });
-            setCurrentUser({ ...currentUser, name, phoneNumber: phone });
-        }
-
-        // Open WhatsApp or phone app
-        const message = `שלום ${offer.driverName}! אני מעוניין/ת בטרמפ מ${offer.fromCity} ל${offer.toCity}. האם יש מקום פנוי?`;
-        const whatsappUrl = `https://wa.me/972${offer.phoneNumber.replace(/^0/, '').replace(/[^\d]/g, '')}?text=${encodeURIComponent(message)}`;
-
+        const message = encodeURIComponent(`שלום ${offer.driverName}, אני מעוניין בטרמפ מ${offer.fromCity} לחתונה. האם יש עוד מקום פנוי?`);
+        const whatsappUrl = `https://wa.me/972${offer.phoneNumber.replace(/^0/, '').replace(/\D/g, '')}?text=${message}`;
         window.open(whatsappUrl, '_blank');
     };
 
-    const handleRequestRide = async (offer) => {
-        if (!currentUser.name || !currentUser.phoneNumber) {
-            alert('אנא מלא את פרטיך תחילה');
-            return;
-        }
-
-        if (offer.availableSeats <= 0) {
-            alert('אין מקומות פנויים בטרמפ זה');
-            return;
-        }
-
-        const confirmed = window.confirm(`האם אתה בטוח שאתה רוצה לבקש מקום בטרמפ של ${offer.driverName}?`);
-        if (!confirmed) return;
-
-        setContacting(prev => ({ ...prev, [offer.id]: true }));
-
-        try {
-            await addPassengerToOffer(offer.id, {
-                deviceId: currentUser.deviceId,
-                name: currentUser.name,
-                phoneNumber: currentUser.phoneNumber
-            });
-
-            alert(`בקשתך נשלחה ל${offer.driverName}. הנהג יוכל לראות את הפרטים שלך וליצור איתך קשר.`);
-
-            // Also open WhatsApp
-            handleContactDriver(offer);
-
-        } catch (error) {
-            console.error('Error requesting ride:', error);
-            alert('שגיאה בשליחת הבקשה. אנא נסה שוב.');
-        } finally {
-            setContacting(prev => ({ ...prev, [offer.id]: false }));
-        }
-    };
-
-    const formatTime = (timeString) => {
-        return timeString || 'לא צוין';
-    };
-
-    const formatPhoneNumber = (phone) => {
-        return phone.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+    const formatDate = (date) => {
+        return new Intl.DateTimeFormat('he-IL', {
+            day: 'numeric',
+            month: 'short',
+            hour: '2-digit',
+            minute: '2-digit'
+        }).format(date);
     };
 
     if (loading) {
         return (
             <div className="carpool-browser loading">
-                <div className="loading-spinner">טוען טרמפים...</div>
+                <div className="loading-spinner">🔄 טוען הצעות טרמפ...</div>
             </div>
         );
     }
-
-    if (offers.length === 0 && !loading) {
-        return (
-            <div className="carpool-browser empty">
-                <div className="empty-state">
-                    <h3>אין טרמפים זמינים כרגע</h3>
-                    <p>היה הראשון להציע טרמפ! 🚗</p>
-                </div>
-            </div>
-        );
-    }
-
-    const SearchFilters = () => (
-        <div className="search-filters-container">
-            <div className="search-filters-header">
-                <h3>🔍 חיפוש טרמפים</h3>
-            </div>
-
-            <div className="search-filters">
-                <div className="filter-row">
-                    <div className="filter-group autocomplete-group">
-                        <label>עיר יציאה 📍</label>
-                        <input
-                            type="text"
-                            value={filters.fromCity}
-                            onChange={(e) => handleFilterChange('fromCity', e.target.value)}
-                            placeholder="הקלד שם עיר..."
-                            className="filter-input"
-                        />
-                        {fromCitySuggestions.length > 0 && (
-                            <div className="city-suggestions">
-                                {fromCitySuggestions.map((city, index) => (
-                                    <div
-                                        key={index}
-                                        onClick={() => handleCitySelect(city, 'fromCity')}
-                                        className="city-suggestion"
-                                    >
-                                        {city}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="filter-group autocomplete-group">
-                        <label>עיר יעד 🎯</label>
-                        <input
-                            type="text"
-                            value={filters.toCity}
-                            onChange={(e) => handleFilterChange('toCity', e.target.value)}
-                            placeholder="הקלד שם עיר..."
-                            className="filter-input"
-                        />
-                        {toCitySuggestions.length > 0 && (
-                            <div className="city-suggestions">
-                                {toCitySuggestions.map((city, index) => (
-                                    <div
-                                        key={index}
-                                        onClick={() => handleCitySelect(city, 'toCity')}
-                                        className="city-suggestion"
-                                    >
-                                        {city}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="filter-group">
-                        <label>זמן יציאה 🕐</label>
-                        <input
-                            type="time"
-                            value={filters.departureTime}
-                            onChange={(e) => handleFilterChange('departureTime', e.target.value)}
-                            className="filter-input"
-                        />
-                    </div>
-
-                    <div className="filter-group">
-                        <label>מקומות פנויים 👥</label>
-                        <select
-                            value={filters.availableSeats}
-                            onChange={(e) => handleFilterChange('availableSeats', e.target.value)}
-                            className="filter-select"
-                        >
-                            <option value="">כל המקומות</option>
-                            <option value="1">1+ מקומות</option>
-                            <option value="2">2+ מקומות</option>
-                            <option value="3">3+ מקומות</option>
-                            <option value="4">4+ מקומות</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div className="filter-actions">
-                    {hasActiveFilters && (
-                        <button
-                            onClick={clearFilters}
-                            className="clear-search-button"
-                        >
-                            🗑️ נקה חיפוש
-                        </button>
-                    )}
-                    <div className="results-counter">
-                        <span className="results-count">
-                            {filteredOffers.length} תוצאות
-                        </span>
-                    </div>
-                </div>
-
-                {hasActiveFilters && (
-                    <div className="active-filters">
-                        <span className="active-filters-label">מסננים פעילים:</span>
-                        <div className="filter-tags">
-                            {filters.fromCity && (
-                                <span
-                                    className="filter-tag"
-                                    onClick={() => handleFilterChange('fromCity', '')}
-                                >
-                                    מ: {filters.fromCity} ✕
-                                </span>
-                            )}
-                            {filters.toCity && (
-                                <span
-                                    className="filter-tag"
-                                    onClick={() => handleFilterChange('toCity', '')}
-                                >
-                                    אל: {filters.toCity} ✕
-                                </span>
-                            )}
-                            {filters.departureTime && (
-                                <span
-                                    className="filter-tag"
-                                    onClick={() => handleFilterChange('departureTime', '')}
-                                >
-                                    זמן: {filters.departureTime} ✕
-                                </span>
-                            )}
-                            {filters.availableSeats && (
-                                <span
-                                    className="filter-tag"
-                                    onClick={() => handleFilterChange('availableSeats', '')}
-                                >
-                                    {filters.availableSeats}+ מקומות ✕
-                                </span>
-                            )}
-                        </div>
-                    </div>
-                )}
-            </div>
-        </div>
-    );
 
     return (
         <div className="carpool-browser">
-            <h3>טרמפים זמינים 🚗</h3>
+            <h3>הצעות טרמפ זמינות 🚙</h3>
 
-            <SearchFilters />
+            {/* Search Filters - Updated to match theme */}
+            <div className="search-filters-container">
+                <div className="search-filters-header">
+                    <h3>🔍 חיפוש טרמפים</h3>
+                </div>
 
-            <div className="offers-grid">
-                {filteredOffers.map(offer => (
-                    <div key={offer.id} className="offer-card">
-                        <div className="offer-header">
-                            <div className="driver-info">
-                                {offer.photoUrl && (
-                                    <img
-                                        src={offer.photoUrl}
-                                        alt={offer.driverName}
-                                        className="driver-photo"
-                                    />
-                                )}
-                                <div className="driver-details">
-                                    <h4>{offer.driverName}</h4>
-                                    <span className="phone-number" dir="ltr">
-                                        📞 {formatPhoneNumber(offer.phoneNumber)}
-                                    </span>
-                                </div>
-                            </div>
-                            <div className="seats-info">
-                                <span className={`seats-count ${offer.availableSeats === 0 ? 'full' : ''}`}>
-                                    {offer.availableSeats} מקומות פנויים
-                                </span>
-                            </div>
-                        </div>
-
-                        <div className="route-info">
-                            <div className="route-item">
-                                <span className="route-label">מ:</span>
-                                <span className="route-value">{offer.fromCity}</span>
-                            </div>
-                            <div className="route-arrow">→</div>
-                            <div className="route-item">
-                                <span className="route-label">אל:</span>
-                                <span className="route-value">{offer.toCity}</span>
-                            </div>
-                            {offer.returnCity && offer.returnCity !== offer.toCity && (
-                                <>
-                                    <div className="route-arrow">→</div>
-                                    <div className="route-item">
-                                        <span className="route-label">חזרה:</span>
-                                        <span className="route-value">{offer.returnCity}</span>
-                                    </div>
-                                </>
-                            )}
-                        </div>
-
-                        <div className="timing-info">
-                            <div className="time-item">
-                                <span className="time-label">יציאה:</span>
-                                <span className="time-value">{formatTime(offer.departureTime)}</span>
-                            </div>
-                            <div className="time-item">
-                                <span className="time-label">חזרה:</span>
-                                <span className="time-value">{formatTime(offer.returnTime)}</span>
-                            </div>
-                        </div>
-
-                        {offer.additionalInfo && (
-                            <div className="additional-info">
-                                <p>{offer.additionalInfo}</p>
-                            </div>
-                        )}
-
-                        <div className="passengers-info">
-                            {offer.passengers && offer.passengers.length > 0 && (
-                                <div className="current-passengers">
-                                    <h5>נוסעים כרגע:</h5>
-                                    <ul>
-                                        {offer.passengers.map((passenger, index) => (
-                                            <li key={index}>
-                                                {passenger.name}
-                                                {passenger.status === 'pending' && ' (ממתין לאישור)'}
-                                            </li>
-                                        ))}
-                                    </ul>
+                <div className="search-filters">
+                    <div className="filter-row">
+                        <div className="filter-group autocomplete-group">
+                            <label>עיר יציאה 📍</label>
+                            <input
+                                type="text"
+                                value={searchFilters.fromCity}
+                                onChange={(e) => handleSearchChange('fromCity', e.target.value)}
+                                placeholder="הקלד שם עיר..."
+                                className="filter-input"
+                            />
+                            {fromCitySuggestions.length > 0 && (
+                                <div className="city-suggestions">
+                                    {fromCitySuggestions.map((city, index) => (
+                                        <div
+                                            key={index}
+                                            onClick={() => handleCitySelect(city, 'fromCity')}
+                                            className="city-suggestion"
+                                        >
+                                            {city}
+                                        </div>
+                                    ))}
                                 </div>
                             )}
                         </div>
 
-                        <div className="offer-actions">
-                            <button
-                                onClick={() => handleContactDriver(offer)}
-                                className="contact-button"
+                        <div className="filter-group">
+                            <label>מקומות פנויים 👥</label>
+                            <select
+                                value={searchFilters.minSeats}
+                                onChange={(e) => handleSearchChange('minSeats', e.target.value)}
+                                className="filter-select"
                             >
-                                💬 פנה לנהג
-                            </button>
-
-                            {offer.availableSeats > 0 ? (
-                                <button
-                                    onClick={() => handleRequestRide(offer)}
-                                    disabled={contacting[offer.id]}
-                                    className="request-button"
-                                >
-                                    {contacting[offer.id] ? 'שולח...' : '🚗 בקש מקום'}
-                                </button>
-                            ) : (
-                                <button
-                                    disabled
-                                    className="request-button disabled"
-                                >
-                                    🚫 אין מקומות
-                                </button>
-                            )}
+                                <option value="">כל המקומות</option>
+                                <option value="1">1+ מקומות</option>
+                                <option value="2">2+ מקומות</option>
+                                <option value="3">3+ מקומות</option>
+                                <option value="4">4+ מקומות</option>
+                            </select>
                         </div>
+                    </div>
 
-                        <div className="offer-meta">
-                            <span className="created-date">
-                                פורסם: {new Date(offer.createdAt).toLocaleDateString('he-IL')}
+                    <div className="filter-actions">
+                        {(searchFilters.fromCity || searchFilters.minSeats) && (
+                            <button
+                                onClick={clearFilters}
+                                className="clear-search-button"
+                            >
+                                🗑️ נקה חיפוש
+                            </button>
+                        )}
+                        <div className="results-counter">
+                            <span className="results-count">
+                                {filteredOffers.length} תוצאות
                             </span>
                         </div>
                     </div>
-                ))}
+
+                    {(searchFilters.fromCity || searchFilters.minSeats) && (
+                        <div className="active-filters">
+                            <span className="active-filters-label">מסננים פעילים:</span>
+                            <div className="filter-tags">
+                                {searchFilters.fromCity && (
+                                    <span
+                                        className="filter-tag"
+                                        onClick={() => handleSearchChange('fromCity', '')}
+                                    >
+                                        מ: {searchFilters.fromCity} ✕
+                                    </span>
+                                )}
+                                {searchFilters.minSeats && (
+                                    <span
+                                        className="filter-tag"
+                                        onClick={() => handleSearchChange('minSeats', '')}
+                                    >
+                                        {searchFilters.minSeats}+ מקומות ✕
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
+
+            {filteredOffers.length === 0 ? (
+                <div className="empty-state">
+                    {offers.length === 0 ? (
+                        <>
+                            <h3>אין הצעות טרמפ כרגע</h3>
+                            <p>היה הראשון להציע טרמפ לאורחים אחרים! 🚗</p>
+                        </>
+                    ) : (
+                        <>
+                            <h3>לא נמצאו טרמפים מתאימים</h3>
+                            <p>נסה לשנות את תנאי החיפוש או הצע טרמפ בעצמך</p>
+                        </>
+                    )}
+                </div>
+            ) : (
+                <div className="offers-grid">
+                    {filteredOffers.map(offer => (
+                        <div key={offer.id} className="offer-card">
+                            <div className="offer-header">
+                                <div className="driver-info">
+                                    {offer.photoUrl && (
+                                        <img
+                                            src={offer.photoUrl}
+                                            alt={`תמונת ${offer.driverName}`}
+                                            className="driver-photo"
+                                            onError={(e) => e.target.style.display = 'none'}
+                                        />
+                                    )}
+                                    <div className="driver-details">
+                                        <div className="driver-name-row">
+                                            <h4>{offer.driverName}</h4>
+                                            <span className="created-date">
+                                                {formatDate(offer.createdAt)}
+                                            </span>
+                                        </div>
+                                        <div className="phone-row">
+                                            <span className="phone-number">📞 {offer.phoneNumber}</span>
+                                            {offer.userId !== userId && (
+                                                <button
+                                                    onClick={() => handleContactDriver(offer)}
+                                                    className="whatsapp-icon-button"
+                                                    title="צור קשר בWhatsApp"
+                                                >
+                                                    💬
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="seats-info">
+                                    <span className={`seats-count ${offer.availableSeats === 0 ? 'full' : ''}`}>
+                                        {offer.availableSeats === 0 ? 'מלא' : `${offer.availableSeats} מקומות`}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="route-trips">
+                                {/* Trip to wedding - only show if going to wedding */}
+                                {(offer.rideDirection === 'to' || offer.rideDirection === 'both') && offer.fromCity && (
+                                    <div className="trip-info to-wedding">
+                                        <div className="trip-route">
+                                            <div className="location from-location">
+                                                <span className="location-label">מ:</span>
+                                                <span className="location-value">{offer.fromCity}</span>
+                                            </div>
+                                            <span className="route-arrow">➜</span>
+                                            <div className="location to-location">
+                                                <span className="location-label">אל:</span>
+                                                <span className="location-value">החתונה</span>
+                                            </div>
+                                        </div>
+                                        {offer.departureTime && (
+                                            <div className="trip-time">
+                                                <span className="time-icon">🕐</span>
+                                                <span className="time-value">{offer.departureTime}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Trip from wedding - only show if coming back from wedding */}
+                                {(offer.rideDirection === 'from' || offer.rideDirection === 'both') && (
+                                    <div className="trip-info from-wedding">
+                                        <div className="trip-route">
+                                            <div className="location from-location">
+                                                <span className="location-label">מ:</span>
+                                                <span className="location-value">החתונה</span>
+                                            </div>
+                                            <span className="route-arrow">➜</span>
+                                            <div className="location to-location">
+                                                <span className="location-label">אל:</span>
+                                                <span className="location-value">
+                                                    {offer.rideDirection === 'from' ? offer.returnCity :
+                                                        (offer.returnCity && offer.returnCity !== offer.fromCity) ?
+                                                            offer.returnCity : offer.fromCity}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        {offer.returnTime && (
+                                            <div className="trip-time">
+                                                <span className="time-icon">🕐</span>
+                                                <span className="time-value">{offer.returnTime}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+
+                            {offer.additionalInfo && (
+                                <div className="additional-info">
+                                    <p>{offer.additionalInfo}</p>
+                                </div>
+                            )}
+
+                            {offer.passengers.length > 0 && (
+                                <div className="passengers-info">
+                                    <div className="current-passengers">
+                                        <h5>נוסעים רשומים:</h5>
+                                        <ul>
+                                            {offer.passengers.map((passenger, index) => (
+                                                <li key={index}>
+                                                    {passenger.name} - {passenger.phoneNumber}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 };

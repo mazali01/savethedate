@@ -99,15 +99,15 @@ export const getCarpoolOffers = async () => {
 };
 
 /**
- * Get carpool offers by device ID
- * @param {string} deviceId - Device ID
+ * Get carpool offers by user ID
+ * @param {string} userId - User ID
  * @returns {Promise<Array>} Array of user's carpool offers
  */
-export const getUserCarpoolOffers = async (deviceId) => {
+export const getUserCarpoolOffers = async (userId) => {
     try {
         const q = query(
             collection(db, COLLECTIONS.CARPOOL_OFFERS),
-            where('deviceId', '==', deviceId),
+            where('userId', '==', userId),
             orderBy('createdAt', 'desc')
         );
         const querySnapshot = await getDocs(q);
@@ -245,15 +245,15 @@ export const getCarpoolRequests = async () => {
 };
 
 /**
- * Get carpool requests by device ID
- * @param {string} deviceId - Device ID
+ * Get carpool requests by user ID
+ * @param {string} userId - User ID
  * @returns {Promise<Array>} Array of user's carpool requests
  */
-export const getUserCarpoolRequests = async (deviceId) => {
+export const getUserCarpoolRequests = async (userId) => {
     try {
         const q = query(
             collection(db, COLLECTIONS.CARPOOL_REQUESTS),
-            where('deviceId', '==', deviceId),
+            where('userId', '==', userId),
             orderBy('createdAt', 'desc')
         );
         const querySnapshot = await getDocs(q);
@@ -359,13 +359,13 @@ export const subscribeToCarpoolRequests = (callback) => {
 /**
  * Upload driver photo to Firebase Storage
  * @param {File} file - Image file
- * @param {string} deviceId - User device ID
+ * @param {string} userId - User ID
  * @returns {Promise<string>} Download URL of uploaded image
  */
-export const uploadDriverPhoto = async (file, deviceId) => {
+export const uploadDriverPhoto = async (file, userId) => {
     try {
         const timestamp = Date.now();
-        const fileName = `driver-photos/${deviceId}_${timestamp}_${file.name}`;
+        const fileName = `driver-photos/${userId}_${timestamp}_${file.name}`;
         const storageRef = ref(storage, fileName);
 
         const snapshot = await uploadBytes(storageRef, file);

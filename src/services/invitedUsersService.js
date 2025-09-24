@@ -17,7 +17,6 @@ export const createInvitedUser = async (userData) => {
     try {
         const userWithDefaults = {
             ...userData,
-            peopleCount: 1, // Default to 1 person
             createdAt: new Date(),
             updatedAt: new Date()
         };

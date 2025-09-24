@@ -14,18 +14,37 @@ const AdminAuth = ({ onAuthenticated }) => {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleSubmit = (e) => {
+    // Simple hash function for security (SHA-256 equivalent using Web Crypto API)
+    const hashPassword = async (password) => {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(password);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    };
+
+    // Pre-computed hash of the password (SHA-256)
+    const ADMIN_PASSWORD_HASH = 'b4f659816b66337502bf7bfcd44d334f100f383abc9133bef9e8105e97b9fc93';
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
         setError('');
 
-        // Check password
-        if (password === 'fistuk') {
-            // Store authentication in sessionStorage
-            sessionStorage.setItem('adminAuthenticated', 'true');
-            onAuthenticated(true);
-        } else {
-            setError('סיסמה שגויה');
+        try {
+            // Hash the entered password
+            const inputPasswordHash = await hashPassword(password);
+
+            // Compare with stored hash
+            if (inputPasswordHash === ADMIN_PASSWORD_HASH) {
+                // Store authentication in sessionStorage
+                sessionStorage.setItem('adminAuthenticated', 'true');
+                onAuthenticated(true);
+            } else {
+                setError('סיסמה שגויה');
+            }
+        } catch (error) {
+            setError('שגיאה במערכת');
         }
 
         setIsLoading(false);

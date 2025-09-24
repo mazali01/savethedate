@@ -12,7 +12,7 @@ import {
     AdminPanelSettings as AdminIcon
 } from '@mui/icons-material';
 import AdminAuth from '../components/AdminAuth';
-import UserManagement from '../components/UserManagement';
+import UnifiedUserManagement from '../components/UnifiedUserManagement';
 
 const AdminPage = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -33,13 +33,12 @@ const AdminPage = () => {
     }
 
     return (
-        <Box>
-            {/* Admin App Bar */}
+        <Box sx={{ width: '100%', minHeight: '100vh', backgroundColor: 'rgba(255, 255, 255, 0.95)', display: 'flex', flexDirection: 'column', direction: 'ltr' }}>
             <AppBar position="sticky" sx={{ bgcolor: '#2e7d32' }}>
                 <Toolbar>
                     <AdminIcon sx={{ mr: 2 }} />
                     <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                        פאנל ניהול - חתונת מזל ואורי
+                        פאנל ניהול - חתונת מזל וערן
                     </Typography>
                     <Button
                         color="inherit"
@@ -52,8 +51,8 @@ const AdminPage = () => {
             </AppBar>
 
             {/* Main Content */}
-            <Container maxWidth="lg" sx={{ mt: 3, mb: 3 }}>
-                <UserManagement />
+            <Container maxWidth="lg" sx={{ mt: 3, mb: 3, flexGrow: 1, overflow: 'auto' }}>
+                <UnifiedUserManagement />
             </Container>
         </Box>
     );

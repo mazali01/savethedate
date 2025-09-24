@@ -4,17 +4,16 @@
  * 
  * Fields:
  * - id: string - Document ID
- * - deviceId: string - User device identifier
+ * - userId: string - User identifier
  * - driverName: string - Driver's name
  * - phoneNumber: string - Driver's phone number
  * - fromCity: string - Departure city
- * - toCity: string - Destination (usually wedding location)
- * - returnCity: string - Return destination if different
+ * - returnCity: string - Return destination if different from departure city
  * - availableSeats: number - Number of available seats
  * - totalSeats: number - Total seats offered
+ * - rideDirection: string - 'to', 'from', or 'both' - direction of the ride
  * - departureTime: string - Departure time description
  * - returnTime: string - Return time description
- * - photoUrl: string - URL to driver photo
  * - additionalInfo: string - Additional notes
  * - createdAt: Date - Creation timestamp
  * - updatedAt: Date - Last update timestamp
@@ -28,11 +27,10 @@
  * 
  * Fields:
  * - id: string - Document ID
- * - deviceId: string - User device identifier
+ * - userId: string - User identifier
  * - passengerName: string - Passenger's name
  * - phoneNumber: string - Passenger's phone number
  * - fromCity: string - Departure city
- * - toCity: string - Destination (usually wedding location)
  * - preferredDepartureTime: string - Preferred departure time
  * - preferredReturnTime: string - Preferred return time
  * - additionalInfo: string - Special requests or notes
@@ -52,17 +50,17 @@ export const createCarpoolOffer = (data) => {
     const now = new Date();
     return {
         id: null, // Will be set by Firestore
-        deviceId: data.deviceId,
+        userId: data.userId,
         driverName: data.driverName,
         phoneNumber: data.phoneNumber,
         fromCity: data.fromCity,
-        toCity: data.toCity,
-        returnCity: data.returnCity || data.toCity,
+        toCity: "החתונה", // Everyone is going to the wedding
+        returnCity: data.returnCity || data.fromCity,
         availableSeats: parseInt(data.availableSeats),
         totalSeats: parseInt(data.availableSeats), // Initially same as available
+        rideDirection: data.rideDirection || 'both', // 'to', 'from', or 'both'
         departureTime: data.departureTime || '',
         returnTime: data.returnTime || '',
-        photoUrl: data.photoUrl || '',
         additionalInfo: data.additionalInfo || '',
         createdAt: now,
         updatedAt: now,
@@ -80,11 +78,11 @@ export const createCarpoolRequest = (data) => {
     const now = new Date();
     return {
         id: null, // Will be set by Firestore
-        deviceId: data.deviceId,
+        userId: data.userId,
         passengerName: data.passengerName,
         phoneNumber: data.phoneNumber,
         fromCity: data.fromCity,
-        toCity: data.toCity,
+        toCity: "החתונה", // Everyone is going to the wedding
         preferredDepartureTime: data.preferredDepartureTime || '',
         preferredReturnTime: data.preferredReturnTime || '',
         additionalInfo: data.additionalInfo || '',
@@ -118,7 +116,7 @@ export const reserveSeats = (offer, seatsToReserve = 1) => {
  */
 export const addPassengerToOffer = (offer, passenger) => {
     const newPassenger = {
-        deviceId: passenger.deviceId,
+        userId: passenger.userId,
         name: passenger.name,
         phoneNumber: passenger.phoneNumber,
         acceptedAt: new Date(),
