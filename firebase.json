@@ -1,0 +1,12 @@
+{
+  "projects": {
+    "default": "wedding-c7c59"
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  }
+}

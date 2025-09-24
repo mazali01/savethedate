@@ -1,0 +1,375 @@
+/* SinglesPage.css */
+.singles-main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.profile-status {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(196, 164, 132, 0.2);
+    text-align: center;
+}
+
+.profile-exists {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.profile-card-mini {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+}
+
+.profile-card-mini img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #c4a484;
+}
+
+.profile-card-mini h4 {
+    color: #c4a484;
+    margin: 0 0 0.25rem 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.profile-card-mini p {
+    color: #666;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.edit-profile-btn,
+.create-profile-btn {
+    background: linear-gradient(135deg, #c4a484, #a08660);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-family: 'Heebo', sans-serif;
+    white-space: nowrap;
+}
+
+.edit-profile-btn:hover,
+.create-profile-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(196, 164, 132, 0.3);
+}
+
+.no-profile {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.no-profile-message {
+    flex: 1;
+    text-align: right;
+}
+
+.no-profile-message h4 {
+    color: #c4a484;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.no-profile-message p {
+    color: #666;
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.4;
+}
+
+/* Delete Confirmation Dialog */
+.delete-confirmation-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+    animation: fadeInOverlay 0.2s ease-out;
+}
+
+.delete-confirmation-dialog {
+    background: white;
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    animation: slideInDialog 0.3s ease-out;
+}
+
+.delete-confirmation-dialog h4 {
+    color: #e74c3c;
+    margin: 0 0 1rem 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.delete-confirmation-dialog p {
+    color: #666;
+    margin: 0 0 2rem 0;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.delete-confirmation-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.delete-confirm-btn {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-family: 'Heebo', sans-serif;
+    min-width: 80px;
+}
+
+.delete-confirm-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+}
+
+.delete-confirm-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.delete-cancel-btn {
+    background: transparent;
+    color: #666;
+    border: 2px solid #ddd;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    font-family: 'Heebo', sans-serif;
+    min-width: 80px;
+}
+
+.delete-cancel-btn:hover {
+    background: #f8f9fa;
+    color: #333;
+}
+
+/* Form Actions Styling */
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+.delete-profile-btn {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-family: 'Heebo', sans-serif;
+}
+
+.delete-profile-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+}
+
+.delete-profile-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Animations */
+@keyframes fadeInOverlay {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideInDialog {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Loading and Error States */
+.singles-loading,
+.singles-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 40vh;
+    text-align: center;
+    color: #666;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #c4a484;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.singles-error p {
+    font-size: 1.1rem;
+    color: #e74c3c;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .singles-main {
+        padding: 0.5rem;
+    }
+    
+    .profile-status {
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .profile-exists,
+    .no-profile {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .profile-card-mini {
+        justify-content: center;
+    }
+    
+    .no-profile-message {
+        text-align: center;
+    }
+    
+    .edit-profile-btn,
+    .create-profile-btn {
+        width: 100%;
+        max-width: 250px;
+    }
+
+    .delete-confirmation-dialog {
+        padding: 1.5rem;
+        margin: 1rem;
+        width: calc(100% - 2rem);
+    }
+
+    .delete-confirmation-actions {
+        flex-direction: column;
+    }
+
+    .delete-confirm-btn,
+    .delete-cancel-btn {
+        width: 100%;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .delete-profile-btn {
+        width: 100%;
+        max-width: 250px;
+        margin: 0 auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-status {
+        padding: 1rem;
+        margin: 0.5rem;
+        border-radius: 10px;
+    }
+    
+    .profile-card-mini {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.75rem;
+    }
+    
+    .profile-card-mini img {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .no-profile-message h4 {
+        font-size: 1.1rem;
+    }
+    
+    .no-profile-message p {
+        font-size: 0.9rem;
+    }
+
+    .delete-confirmation-dialog {
+        padding: 1rem;
+    }
+
+    .delete-confirmation-dialog h4 {
+        font-size: 1.1rem;
+    }
+
+    .delete-confirmation-dialog p {
+        font-size: 0.9rem;
+    }
+}

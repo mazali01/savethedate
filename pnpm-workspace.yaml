@@ -4,3 +4,6 @@ onlyBuiltDependencies:
   - esbuild
   - protobufjs
   - puppeteer
+
+overrides:
+  '@dataconnect/generated': link:src/dataconnect-generated

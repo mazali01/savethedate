@@ -4,10 +4,16 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  '@dataconnect/generated': link:src/dataconnect-generated
+
 importers:
 
   .:
     dependencies:
+      '@dataconnect/generated':
+        specifier: link:src/dataconnect-generated
+        version: link:src/dataconnect-generated
       '@emotion/cache':
         specifier: ^11.14.0
         version: 11.14.0
