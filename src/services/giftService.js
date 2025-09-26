@@ -18,7 +18,8 @@ export const uploadMediaFile = async (file, folder = 'blessings') => {
     return {
       url: downloadURL,
       filename: fileName,
-      type: file.type.startsWith('image/') ? 'image' : 'video'
+      type: file.type.startsWith('image/') ? 'image' :
+        file.type.startsWith('audio/') ? 'audio' : 'video'
     };
   } catch (error) {
     console.error('Error uploading media:', error);
@@ -47,7 +48,11 @@ export const validateMediaFile = (file) => {
     'image/webp',
     'video/mp4',
     'video/webm',
-    'video/quicktime'
+    'video/quicktime',
+    'audio/webm',
+    'audio/ogg',
+    'audio/mp4',
+    'audio/mpeg'
   ];
 
   if (!allowedTypes.includes(file.type)) {
@@ -107,6 +112,35 @@ export const getPublicBlessings = async () => {
   }
 };
 
+export const getUserBlessings = async (userId) => {
+  try {
+    const q = query(
+      collection(db, 'blessings'),
+      where('userId', '==', userId),
+      orderBy('createdAt', 'desc')
+    );
+
+    const querySnapshot = await getDocs(q);
+    const blessings = [];
+
+    for (const doc of querySnapshot.docs) {
+      const blessingData = { id: doc.id, ...doc.data() };
+
+      // Get reactions for this blessing
+      const reactionsQ = query(collection(db, 'reactions'), where('blessingId', '==', doc.id));
+      const reactionsSnapshot = await getDocs(reactionsQ);
+      blessingData.reactions = reactionsSnapshot.docs.map(rDoc => ({ id: rDoc.id, ...rDoc.data() }));
+
+      blessings.push(blessingData);
+    }
+
+    return blessings;
+  } catch (error) {
+    console.error('Error getting user blessings:', error);
+    throw error;
+  }
+};
+
 export const addReaction = async (blessingId, userId, username, emoji) => {
   try {
     // Check if user already has a reaction for this blessing
@@ -154,6 +188,61 @@ export const removeReaction = async (blessingId, userId) => {
     }
   } catch (error) {
     console.error('Error removing reaction:', error);
+    throw error;
+  }
+};
+
+export const deleteBlessing = async (blessingId, userId) => {
+  try {
+    // First, get the blessing to check ownership and get media filename
+    const blessingDoc = await getDoc(doc(db, 'blessings', blessingId));
+    if (!blessingDoc.exists()) {
+      throw new Error('הברכה לא נמצאה');
+    }
+
+    const blessingData = blessingDoc.data();
+
+    // Check if the current user is the owner of the blessing
+    if (blessingData.userId !== userId) {
+      throw new Error('אין לך הרשאה למחוק ברכה זו');
+    }
+
+    // Delete associated media file if exists
+    if (blessingData.mediaUrl) {
+      try {
+        // Extract filename from URL
+        const urlParts = blessingData.mediaUrl.split('/');
+        const fileNameWithParams = urlParts[urlParts.length - 1];
+        const fileName = fileNameWithParams.split('?')[0]; // Remove query parameters
+        const decodedFileName = decodeURIComponent(fileName);
+
+        // Extract just the UUID filename part after the folder
+        const fileNameParts = decodedFileName.split('%2F'); // %2F is URL encoded '/'
+        const actualFileName = fileNameParts[fileNameParts.length - 1];
+
+        if (actualFileName && actualFileName !== '') {
+          await deleteMediaFile(actualFileName);
+        }
+      } catch (mediaError) {
+        console.warn('Error deleting media file:', mediaError);
+        // Continue with blessing deletion even if media deletion fails
+      }
+    }
+
+    // Delete all reactions associated with this blessing
+    const reactionsQ = query(collection(db, 'reactions'), where('blessingId', '==', blessingId));
+    const reactionsSnapshot = await getDocs(reactionsQ);
+    const deleteReactionPromises = reactionsSnapshot.docs.map(reactionDoc =>
+      deleteDoc(doc(db, 'reactions', reactionDoc.id))
+    );
+    await Promise.all(deleteReactionPromises);
+
+    // Finally, delete the blessing document
+    await deleteDoc(doc(db, 'blessings', blessingId));
+
+    return true;
+  } catch (error) {
+    console.error('Error deleting blessing:', error);
     throw error;
   }
 };
@@ -215,8 +304,7 @@ export const generatePaymentQR = (paymentType, amount = null) => {
 
 // Common emoji reactions
 export const getCommonEmojis = () => [
-  '❤️', '😍', '🥰', '😘', '🤗', '👏', '🙌', '✨', '💕', '🎉',
-  '🥳', '😊', '😂', '🤩', '🔥', '💯', '👰', '🤵', '💒', '🎊'
+  '❤️', '😍', '🙌', '🥳', '😂'
 ];
 
 // Format date for display in Hebrew

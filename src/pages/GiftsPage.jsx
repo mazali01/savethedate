@@ -1,10 +1,16 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useDropzone } from 'react-dropzone';
 import { motion, AnimatePresence } from 'framer-motion';
 import { IconButton } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import AttachFileIcon from '@mui/icons-material/AttachFile';
+import DeleteIcon from '@mui/icons-material/Delete';
+import AddReactionIcon from '@mui/icons-material/AddReaction';
+import Picker from '@emoji-mart/react';
+import data from '@emoji-mart/data';
+import WhatsAppInput from '../components/WhatsAppInput';
+import PaymentGifts from '../components/PaymentGifts';
+import PrivacyToggle from '../components/PrivacyToggle';
+import Notification from '../components/Notification';
 import {
   uploadMediaFile,
   validateMediaFile,
@@ -16,7 +22,8 @@ import {
   getPublicBlessings,
   addReaction,
   removeReaction,
-  upsertUser
+  upsertUser,
+  deleteBlessing
 } from '../services/giftService';
 import { getInvitedUserById } from '../services/rsvpService';
 import './GiftsPage.css';
@@ -27,13 +34,14 @@ const GiftsPage = () => {
   const [user, setUser] = useState(null);
   const [message, setMessage] = useState('');
   const [isPublic, setIsPublic] = useState(true);
-  const [mediaFile, setMediaFile] = useState(null);
   const [mediaPreview, setMediaPreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [blessings, setBlessings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [notification, setNotification] = useState(null);
   const [error, setError] = useState(null);
+  const [emojiPickerAnchor, setEmojiPickerAnchor] = useState(null);
+  const [selectedBlessingForEmoji, setSelectedBlessingForEmoji] = useState(null);
 
   const paymentLinks = useMemo(() => createPaymentLinks(), []);
   const commonEmojis = useMemo(() => getCommonEmojis(), []);
@@ -91,43 +99,18 @@ const GiftsPage = () => {
     setTimeout(() => setNotification(null), 3000);
   }, []);
 
-  // Handle file drop
-  const onDrop = useCallback((acceptedFiles) => {
-    if (acceptedFiles.length > 0) {
-      const file = acceptedFiles[0];
-      try {
-        validateMediaFile(file);
-        setMediaFile(file);
-
-        // Create preview URL
-        const previewUrl = URL.createObjectURL(file);
-        setMediaPreview({
-          url: previewUrl,
-          type: file.type.startsWith('image/') ? 'image' : 'video'
-        });
-      } catch (error) {
-        showNotification(error.message, 'error');
-      }
-    }
-  }, [showNotification]);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      'image/*': ['.jpeg', '.jpg', '.png', '.gif', '.webp'],
-      'video/*': ['.mp4', '.webm', '.mov']
-    },
-    maxFiles: 1
-  });
+  // Handle media selection from WhatsApp input
+  const handleMediaSelect = useCallback((mediaData) => {
+    setMediaPreview(mediaData);
+  }, []);
 
   // Remove media file
-  const removeMedia = () => {
+  const removeMedia = useCallback(() => {
     if (mediaPreview) {
       URL.revokeObjectURL(mediaPreview.url);
     }
-    setMediaFile(null);
     setMediaPreview(null);
-  };
+  }, [mediaPreview]);
 
   // Handle blessing submission
   const handleSubmit = async (e) => {
@@ -155,8 +138,8 @@ const GiftsPage = () => {
       let mediaType = null;
 
       // Upload media if present
-      if (mediaFile) {
-        const uploadResult = await uploadMediaFile(mediaFile);
+      if (mediaPreview?.file) {
+        const uploadResult = await uploadMediaFile(mediaPreview.file);
         mediaUrl = uploadResult.url;
         mediaType = uploadResult.type;
       }
@@ -218,6 +201,54 @@ const GiftsPage = () => {
     }
   };
 
+  // Handle blessing deletion
+  const handleDeleteBlessing = async (blessingId) => {
+    if (!user) {
+      showNotification('אנא התחבר כדי למחוק ברכה', 'error');
+      return;
+    }
+
+    // Show confirmation dialog
+    const isConfirmed = window.confirm('האם אתם בטוחים שברצונכם למחוק את הברכה? פעולה זו לא ניתנת לביטול.');
+
+    if (!isConfirmed) {
+      return;
+    }
+
+    try {
+      await deleteBlessing(blessingId, user.uid);
+      showNotification('הברכה נמחקה בהצלחה');
+
+      // Reload blessings to reflect the deletion
+      loadBlessings();
+    } catch (error) {
+      console.error('Error deleting blessing:', error);
+      showNotification(error.message || 'שגיאה במחיקת הברכה', 'error');
+    }
+  };
+
+  // Handle emoji picker open
+  const handleEmojiPickerOpen = (event, blessingId) => {
+    setEmojiPickerAnchor(event.currentTarget);
+    setSelectedBlessingForEmoji(blessingId);
+  };
+
+  // Handle emoji picker close
+  const handleEmojiPickerClose = () => {
+    setEmojiPickerAnchor(null);
+    setSelectedBlessingForEmoji(null);
+  };
+
+  // Handle emoji selection from picker
+  const handleEmojiSelect = (emoji) => {
+    if (selectedBlessingForEmoji) {
+      // emoji-mart returns an emoji object, we need the native emoji
+      const emojiChar = emoji.native || emoji.emoji || emoji;
+      handleReaction(selectedBlessingForEmoji, emojiChar);
+    }
+    handleEmojiPickerClose();
+  };
+
   // Get user's reaction for a blessing
   const getUserReaction = (blessing) => {
     if (!user) return null;
@@ -235,7 +266,7 @@ const GiftsPage = () => {
 
   return (
     <div className="gifts-container">
-      {/* Fixed Header with Back Button and Condensed Blessing Form */}
+      {/* Fixed Header with Back Button */}
       <div className="fixed-header">
         <IconButton
           onClick={handleBack}
@@ -257,78 +288,28 @@ const GiftsPage = () => {
         <div className="header-content">
           <h2 className="header-title">ברכות ואיחולים מהלב 💝</h2>
 
-          {/* Condensed Blessing Form */}
-          <form onSubmit={handleSubmit} className="condensed-blessing-form">
-            <div className="textarea-container">
-              <textarea
-                className="condensed-textarea"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="כתבו את הברכה שלכם כאן... ✨"
-                rows={3}
+          {/* WhatsApp Input - Back to header */}
+          <div className="header-input-section">
+            <div className="input-with-privacy">
+              <WhatsAppInput
+                message={message}
+                setMessage={setMessage}
+                onSubmit={handleSubmit}
+                isSubmitting={isSubmitting}
+                placeholder="כאן כותבים שאתם אוהבים אותנו"
+                onMediaSelect={handleMediaSelect}
+                mediaPreview={mediaPreview}
+                onRemoveMedia={removeMedia}
+                disabled={!user}
               />
-              <div className="textarea-buttons">
-                <input
-                  {...getInputProps()}
-                  id="file-upload"
-                  style={{ display: 'none' }}
-                />
-                <IconButton
-                  component="label"
-                  htmlFor="file-upload"
-                  className="attach-button-inside"
-                  size="small"
-                  sx={{
-                    color: '#636e72',
-                    '&:hover': { backgroundColor: 'rgba(0,0,0,0.1)' }
-                  }}
-                >
-                  <AttachFileIcon />
-                </IconButton>
-                <IconButton
-                  type="submit"
-                  disabled={isSubmitting || !message.trim() || !user}
-                  className="send-button-inside"
-                  size="small"
-                  sx={{
-                    color: '#74b9ff',
-                    '&:hover': { backgroundColor: 'rgba(116, 185, 255, 0.1)' },
-                    '&:disabled': { color: '#ccc' }
-                  }}
-                >
-                  {isSubmitting ? '⏳' : '💌'}
-                </IconButton>
-              </div>
-            </div>
 
-            <div className="form-options">
-              <label className="privacy-checkbox">
-                <input
-                  type="checkbox"
-                  checked={isPublic}
-                  onChange={(e) => setIsPublic(e.target.checked)}
-                />
-                <span>ברכה ציבורית</span>
-              </label>
-
-              {mediaPreview && (
-                <div className="media-preview-small">
-                  {mediaPreview.type === 'image' ? (
-                    <img src={mediaPreview.url} alt="Preview" />
-                  ) : (
-                    <video src={mediaPreview.url} />
-                  )}
-                  <button
-                    type="button"
-                    onClick={removeMedia}
-                    className="remove-media-small"
-                  >
-                    ×
-                  </button>
-                </div>
-              )}
+              <PrivacyToggle
+                isPublic={isPublic}
+                onChange={(e) => setIsPublic(e.target.checked)}
+                disabled={isSubmitting || !user}
+              />
             </div>
-          </form>
+          </div>
         </div>
       </div>
 
@@ -362,7 +343,6 @@ const GiftsPage = () => {
                     <motion.div
                       key={blessing.id}
                       className="blessing-card"
-                      style={{ '--rotation': `${blessing.rotation}deg` }}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -20 }}
@@ -381,6 +361,26 @@ const GiftsPage = () => {
                             {formatDate(blessing.createdAt)}
                           </div>
                         </div>
+                        {/* Delete button - only show for user's own blessings */}
+                        {user && blessing.userId === user.uid && (
+                          <IconButton
+                            onClick={() => handleDeleteBlessing(blessing.id)}
+                            size="small"
+                            className="delete-blessing-button"
+                            sx={{
+                              marginRight: 'auto',
+                              color: '#dc3545',
+                              opacity: 0.7,
+                              '&:hover': {
+                                opacity: 1,
+                                backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                              },
+                            }}
+                            title="מחק ברכה"
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        )}
                       </div>
 
                       {blessing.mediaUrl && (
@@ -391,6 +391,15 @@ const GiftsPage = () => {
                               alt="Blessing media"
                               loading="lazy"
                             />
+                          ) : blessing.mediaType === 'audio' ? (
+                            <div className="audio-message">
+                              <audio
+                                src={blessing.mediaUrl}
+                                controls
+                                preload="metadata"
+                              />
+                              <span className="audio-label">🎵 Voice Message</span>
+                            </div>
                           ) : (
                             <video
                               src={blessing.mediaUrl}
@@ -407,7 +416,7 @@ const GiftsPage = () => {
 
                       <div className="blessing-reactions">
                         <div className="reaction-buttons">
-                          {commonEmojis.slice(0, 6).map((emoji) => (
+                          {commonEmojis.slice(0, 5).map((emoji) => (
                             <button
                               key={emoji}
                               onClick={() => handleReaction(blessing.id, emoji)}
@@ -423,6 +432,14 @@ const GiftsPage = () => {
                               )}
                             </button>
                           ))}
+                          {/* Emoji picker button */}
+                          <button
+                            onClick={(e) => handleEmojiPickerOpen(e, blessing.id)}
+                            className="reaction-button emoji-picker-button"
+                            title="בחר אימוג'י נוסף"
+                          >
+                            <AddReactionIcon fontSize="small" />
+                          </button>
                         </div>
 
                         {Object.keys(groupedReactions).length > 0 && (
@@ -479,20 +496,72 @@ const GiftsPage = () => {
         </div>
       </div>
 
-      {/* Notification */}
+      {/* Emoji Picker Modal */}
       <AnimatePresence>
-        {notification && (
+        {emojiPickerAnchor && (
           <motion.div
-            className={`notification ${notification.type}`}
-            initial={{ opacity: 0, x: 100 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 100 }}
-            transition={{ duration: 0.3 }}
+            className="emoji-picker-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={handleEmojiPickerClose}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              zIndex: 9999,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '20px'
+            }}
           >
-            {notification.message}
+            <motion.div
+              className="emoji-picker-container"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                backgroundColor: 'white',
+                borderRadius: '15px',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+                overflow: 'hidden',
+                maxWidth: '320px',
+                maxHeight: '400px',
+                width: '100%'
+              }}
+            >
+              <Picker
+                data={data}
+                onEmojiSelect={handleEmojiSelect}
+                theme="light"
+                previewPosition="none"
+                searchPosition="top"
+                set="native"
+                showPreview={false}
+                showSkinTones={false}
+                emojiButtonSize={32}
+                emojiSize={24}
+                perLine={8}
+                maxFrequentRows={2}
+                categories={['frequent', 'people', 'nature', 'foods', 'activity', 'places', 'objects', 'symbols']}
+              />
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Notification */}
+      <Notification
+        notification={notification}
+        onClose={() => setNotification(null)}
+      />
     </div>
   );
 };

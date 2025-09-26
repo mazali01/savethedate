@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { Box, Typography, CircularProgress } from '@mui/material';
 
-import { getRsvpResponse, hasCompletedRsvp } from '../services/rsvpService';
+import { hasCompletedRsvp } from '../services/rsvpService';
 import PageTemplate from './PageTemplate';
 
 const UserRouteWrapper = ({ children }) => {

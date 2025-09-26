@@ -3,7 +3,7 @@
 .gifts-container {
   display: flex;
   flex-direction: column;
-  height: 93vh;
+  height: 100vh;
   background: linear-gradient(135deg, #ffeaa7, #fab1a0, #fd79a8);
   direction: rtl;
   font-family: 'Heebo', sans-serif;
@@ -23,12 +23,31 @@
 .header-content {
   max-width: 800px;
   margin: 0 auto;
-  padding-top: 30px; /* Space for back button */
+  padding-top: 0.5em; /* Space for back button */
+}
+
+  .header-input-section {
+    margin-top: 16px;
+  }
+  
+  .input-with-privacy {
+    gap: 8px;
+    align-items: center;
+  }
+
+.input-with-privacy {
+  display: flex;
+  align-items: flex-end;
+}
+
+.input-with-privacy .whatsapp-input-container {
+  flex: 1;
 }
 
 .header-title {
   text-align: center;
-  margin: 0 0 15px 0;
+  padding: 0 1.5em;
+  margin: 0;
   font-size: 1.5rem;
   color: #2d3436;
   font-weight: 600;
@@ -179,7 +198,7 @@
 .scrollable-body {
   flex: 1;
   padding: 1em;
-  padding-bottom: 8em;
+  padding-bottom: 8em; /* Adjusted for payment footer */
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -238,6 +257,7 @@
   display: flex;
   align-items: center;
   margin-bottom: 15px;
+  position: relative;
 }
 
 .blessing-avatar {
@@ -268,6 +288,27 @@
   color: #636e72;
 }
 
+.delete-blessing-button {
+  position: absolute !important;
+  top: -8px !important;
+  left: -8px !important;
+  z-index: 2 !important;
+  transition: all 0.2s ease !important;
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-radius: 50% !important;
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  opacity: 0 !important;
+  transform: scale(0.8) !important;
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3) !important;
+}
+
+.blessing-card:hover .delete-blessing-button {
+  opacity: 1 !important;
+  transform: scale(1) !important;
+}
+
 .blessing-media {
   margin: 15px 0;
   border-radius: 12px;
@@ -281,11 +322,34 @@
   display: block;
 }
 
+.audio-message {
+  background: #e7ffdb;
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.audio-message audio {
+  width: 100%;
+  max-width: 250px;
+  height: 32px;
+}
+
+.audio-label {
+  font-size: 0.85rem;
+  color: #667781;
+  font-weight: 500;
+}
+
 .blessing-message {
   margin: 15px 0;
   color: #2d3436;
   line-height: 1.6;
   word-break: break-word;
+  white-space: pre-wrap; /* Preserve line breaks and spaces */
 }
 
 .blessing-reactions {
@@ -310,7 +374,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 0.9rem;
+  font-size: 0.5rem;
   transition: all 0.2s ease;
 }
 
@@ -469,27 +533,7 @@
   background: rgba(255, 255, 255, 0.95) !important;
 }
 
-/* Notifications */
-.notification {
-  position: fixed;
-  top: 20px;
-  left: 20px;
-  padding: 15px 20px;
-  border-radius: 10px;
-  color: white;
-  font-weight: 500;
-  z-index: 1000;
-  max-width: 300px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.notification.success {
-  background: linear-gradient(45deg, #00b894, #00cec9);
-}
-
-.notification.error {
-  background: linear-gradient(45deg, #e74c3c, #fd79a8);
-}
+/* Old notification styles removed - now using Notification component */
 
 /* Responsive Design */
 @media (max-width: 768px) {
@@ -501,24 +545,21 @@
     font-size: 1.3rem;
   }
   
-  .condensed-textarea {
-    font-size: 16px; /* Prevent zoom on iOS */
-    padding: 12px 70px 12px 16px; /* Maintain WhatsApp-like padding on mobile */
-    min-height: 44px; /* Keep consistent height */
-    border-radius: 22px; /* Slightly less rounded on mobile */
+  .header-input-section {
+    gap: 10px;
   }
   
-  .textarea-buttons {
-    bottom: 6px;
-    left: 6px;
-    gap: 4px; /* Tighter spacing on mobile */
+  .scrollable-body {
+    padding: 0.5em;
+    padding-bottom: 10em; /* Space for payment footer */
   }
-
-  .attach-button-inside,
-  .send-button-inside {
-    width: 28px !important;
-    height: 28px !important;
-    min-width: 28px !important;
+  
+  .fixed-footer {
+    padding: 12px 0;
+  }
+  
+  .footer-content {
+    padding: 0 12px;
   }
 }
 
@@ -529,7 +570,17 @@
 .gifts-subtitle,
 .payment-section,
 .payment-section-bottom,
-.blessing-form-section {
+.blessing-form-section,
+.condensed-blessing-form,
+.textarea-container,
+.condensed-textarea,
+.textarea-buttons,
+.attach-button-inside,
+.send-button-inside,
+.form-options,
+.privacy-checkbox,
+.media-preview-small,
+.remove-media-small {
   display: none;
 }
 
@@ -690,7 +741,6 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 20px;
 }
 
 .privacy-toggle input[type="checkbox"] {
@@ -939,6 +989,7 @@
   line-height: 1.6;
   margin-bottom: 15px;
   font-size: 1rem;
+  white-space: pre-wrap; /* Preserve line breaks and spaces */
 }
 
 /* Reactions Section */
@@ -961,7 +1012,7 @@
   padding: 5px 12px;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 1.1rem;
+  font-size: 1rem;
   display: flex;
   align-items: center;
   gap: 5px;
@@ -1022,14 +1073,12 @@
   border: 2px solid #6c5ce7;
   border-top: 2px solid transparent;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
   margin-right: 10px;
 }
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* Error States */
@@ -1168,4 +1217,20 @@
 
 .gifts-container::-webkit-scrollbar-thumb:hover {
   background: rgba(108, 92, 231, 0.5);
+}
+
+/* Emoji picker button in reaction buttons */
+.reaction-button.emoji-picker-button {
+  background-color: #f8f9fa;
+  border: 1px dashed #b2bec3;
+  color: #636e72;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reaction-button.emoji-picker-button:hover {
+  background-color: #e9ecef;
+  border-color: #74b9ff;
+  color: #74b9ff;
 }

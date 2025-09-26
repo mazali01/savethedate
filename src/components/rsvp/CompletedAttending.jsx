@@ -55,7 +55,7 @@ const CompletedAttending = ({
                         <Button
                             variant="outlined"
                             dir='ltr'
-                            startIcon={<EditIcon />}
+                            startIcon={<EditIcon sx={{ ml: 1 }} />}
                             onClick={onUpdateGuestCount}
                             disabled={isSubmitting}
                             sx={{ minWidth: 180, py: 1.5 }}
@@ -67,7 +67,7 @@ const CompletedAttending = ({
                             variant="outlined"
                             color="error"
                             dir='ltr'
-                            startIcon={<CancelIcon />}
+                            startIcon={<CancelIcon sx={{ ml: 1 }} />}
                             onClick={onCancelAttendance}
                             disabled={isSubmitting}
                             sx={{ minWidth: 180, py: 1.5 }}

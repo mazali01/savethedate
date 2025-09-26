@@ -1,0 +1,240 @@
+/* Voice Recorder Modal Styles */
+/* Voice Recorder Modal */
+.voice-recorder-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: 20px;
+}
+
+.voice-recorder-modal {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 24px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    position: relative;
+    direction: rtl;
+}
+
+.voice-recorder-modal.centered {
+    /* Ensures modal is centered */
+    position: relative;
+}
+
+/* Header */
+.recording-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.recording-header h3 {
+    color: #1f2937;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Main Content */
+.recording-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+}
+
+/* Microphone Section */
+.microphone-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.microphone-icon-container {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00a884, #00c496);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: all 0.1s ease;
+}
+
+.microphone-icon {
+    width: 40px;
+    height: 40px;
+    color: white;
+}
+
+.recording-time {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1f2937;
+    font-family: monospace;
+    letter-spacing: 1px;
+}
+
+/* Audio Visualizer */
+.visualizer-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 2px solid #e2e8f0;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+}
+
+.discard-button,
+.send-button {
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.discard-button {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.discard-button:hover {
+    box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+    transform: translateY(-1px);
+}
+
+.send-button:hover:not(:disabled) {
+    box-shadow: 0 6px 16px rgba(0, 168, 132, 0.4);
+    transform: translateY(-1px);
+}
+
+.send-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.button-icon {
+    width: 24px;
+    height: 24px;
+    color: white;
+}
+
+/* Playback Section */
+.playback-section {
+    width: 100%;
+    margin-top: 16px;
+}
+
+.audio-player {
+    width: 100%;
+    height: 40px;
+    border-radius: 20px;
+    background: #f1f5f9;
+    outline: none;
+}
+
+.audio-player::-webkit-media-controls-panel {
+    background: #f1f5f9;
+    border-radius: 20px;
+}
+
+/* Error Section */
+.error-section {
+    text-align: center;
+    padding: 20px;
+}
+
+.error-icon {
+    width: 48px;
+    height: 48px;
+    color: #ef4444;
+    margin: 0 auto 16px;
+}
+
+.error-text {
+    color: #374151;
+    margin-bottom: 20px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.retry-button {
+    background: linear-gradient(135deg, #6b7280, #4b5563);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.retry-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 480px) {
+    .voice-recorder-overlay {
+        padding: 16px;
+    }
+    
+    .voice-recorder-modal {
+        padding: 20px;
+        max-width: none;
+    }
+    
+    .microphone-icon-container {
+        width: 72px;
+        height: 72px;
+    }
+    
+    .microphone-icon {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .recording-time {
+        font-size: 18px;
+    }
+    
+    .action-buttons {
+        gap: 20px;
+    }
+    
+    .discard-button,
+    .send-button {
+        width: 1em;
+        height: 1em;
+    }
+    
+    .button-icon {
+        width: 22px;
+        height: 22px;
+    }
+}

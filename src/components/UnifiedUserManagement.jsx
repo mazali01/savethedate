@@ -192,7 +192,7 @@ const UnifiedUserManagement = () => {
             setEditingUser(null);
             setFormData({ name: '', phoneNumber: '' });
             loadUsers();
-        } catch (error) {
+        } catch {
             setError('שגיאה בשמירת המוזמן');
         }
     };
@@ -212,7 +212,7 @@ const UnifiedUserManagement = () => {
                 await deleteInvitedUser(userId);
                 setSuccess('המוזמן נמחק בהצלחה');
                 loadUsers();
-            } catch (error) {
+            } catch {
                 setError('שגיאה במחיקת המוזמן');
             }
         }
@@ -256,7 +256,7 @@ const UnifiedUserManagement = () => {
             setOpenUploadDialog(false);
             setUploadFile(null);
             loadUsers();
-        } catch (error) {
+        } catch {
             setError('שגיאה בעיבוד הקובץ');
         }
     };
@@ -315,7 +315,7 @@ const UnifiedUserManagement = () => {
             } else {
                 setError('שגיאה בהעתקת הקישור');
             }
-        } catch (error) {
+        } catch {
             setError('שגיאה בהעתקת הקישור');
         }
     };
@@ -334,7 +334,7 @@ const UnifiedUserManagement = () => {
 
             // Refresh SMS balance after sending
             loadSmsBalance();
-        } catch (error) {
+        } catch {
             setError(`שגיאה בשליחת הזמנה ל-${user.name}`);
         } finally {
             setSending(false);
@@ -368,7 +368,7 @@ const UnifiedUserManagement = () => {
             loadSmsBalance();
 
             setSelectedUsers(new Set());
-        } catch (error) {
+        } catch {
             setError('שגיאה בשליחת ההזמנות');
         } finally {
             setSending(false);
@@ -400,7 +400,7 @@ const UnifiedUserManagement = () => {
             } else {
                 setError(`שגיאה בשליחת הודעת בדיקה: ${result.error}`);
             }
-        } catch (error) {
+        } catch {
             setError('שגיאה בשליחת הודעת בדיקה');
         } finally {
             setSending(false);

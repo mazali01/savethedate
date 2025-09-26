@@ -43,7 +43,7 @@ const AdminAuth = ({ onAuthenticated }) => {
             } else {
                 setError('סיסמה שגויה');
             }
-        } catch (error) {
+        } catch {
             setError('שגיאה במערכת');
         }
 

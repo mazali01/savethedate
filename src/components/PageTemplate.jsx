@@ -4,8 +4,6 @@ import { IconButton, Paper, Box } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CalendarButtons from './AddCalendar';
 
-const weddingStartDate = new Date('2025-10-16T19:00:00');
-
 const PageTemplate = ({ children, title, showBackButton = true }) => {
     const navigate = useNavigate();
     const { userId } = useParams();

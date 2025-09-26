@@ -7,7 +7,6 @@ const SinglesBrowser = ({ currentUserId }) => {
     const [profiles, setProfiles] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
-    const [currentUserProfile, setCurrentUserProfile] = useState(null);
 
     useEffect(() => {
         fetchMatchingProfiles();
@@ -19,7 +18,6 @@ const SinglesBrowser = ({ currentUserId }) => {
 
             // First get current user's profile to know their preferences
             const userProfile = await getSinglesProfile(currentUserId);
-            setCurrentUserProfile(userProfile);
 
             if (!userProfile) {
                 setError('לא נמצא פרופיל. יש ליצור פרופיל קודם.');
