@@ -123,7 +123,7 @@ export const generateInvitationLink = (userId, userName) => {
     // Optimized message under 134 characters for single SMS
     const message = `היי ${userName},
 אנחנו מתחתנים ורוצים אותך איתנו! 💍
-מחכות הפתעות בקישור: ${invitationUrl}`;
+לפרטים נוספים ואישור הגעה: ${invitationUrl}`;
 
     return {
         url: invitationUrl,
