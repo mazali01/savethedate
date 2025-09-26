@@ -1,10 +1,4 @@
-# Example mutations for a simple movie app
-
-# Create a movie based on user input
-mutation CreateMovie($title: String!, $genre: String!, $imageUrl: String!)
-@auth(level: USER_EMAIL_VERIFIED, insecureReason: "Any email verified users can create a new movie.") {
-  movie_insert(data: { title: $title, genre: $genre, imageUrl: $imageUrl })
-}
+# Mutations for wedding gifts and blessings app
 
 # Upsert (update or insert) a user's username based on their auth.uid
 mutation UpsertUser($username: String!) @auth(level: USER) {
@@ -12,22 +6,35 @@ mutation UpsertUser($username: String!) @auth(level: USER) {
   user_upsert(data: { id_expr: "auth.uid", username: $username })
 }
 
-# Add a review for a movie
-mutation AddReview($movieId: UUID!, $rating: Int!, $reviewText: String!)
+# Create a new blessing/gift message
+mutation CreateBlessing($message: String!, $isPublic: Boolean!, $mediaUrl: String, $mediaType: String)
 @auth(level: USER) {
-  review_upsert(
+  blessing_insert(data: {
+    userId_expr: "auth.uid"
+    message: $message
+    isPublic: $isPublic
+    mediaUrl: $mediaUrl
+    mediaType: $mediaType
+  })
+}
+
+# Add or update an emoji reaction to a blessing
+mutation AddReaction($blessingId: UUID!, $emoji: String!) @auth(level: USER) {
+  reaction_upsert(
     data: {
       userId_expr: "auth.uid"
-      movieId: $movieId
-      rating: $rating
-      reviewText: $reviewText
-      # reviewDate defaults to today in the schema. No need to set it manually.
+      blessingId: $blessingId
+      emoji: $emoji
     }
   )
 }
 
-# Logged in user can delete their review for a movie
-mutation DeleteReview($movieId: UUID!) @auth(level: USER) {
-  # The "auth.uid" server value ensures that users can only delete their own reviews.
-  review_delete(key: { userId_expr: "auth.uid", movieId: $movieId })
+# Remove a reaction from a blessing
+mutation RemoveReaction($blessingId: UUID!) @auth(level: USER) {
+  reaction_delete(key: { userId_expr: "auth.uid", blessingId: $blessingId })
+}
+
+# Delete a blessing (only by the creator)
+mutation DeleteBlessing($blessingId: UUID!) @auth(level: USER) {
+  blessing_delete(where: { id: { eq: $blessingId }, userId_expr: "auth.uid" })
 }

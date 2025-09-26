@@ -25,7 +25,7 @@ const WeddingMenu = () => {
         { key: 'album', label: 'כאן מעלים תמונות', emoji: '📸', href: 'https://photos.google.com/share/AF1QipMGz2_kVYdc8AoDk7hRvFTW2OIe2CUQYfEVLMPljNqgSQ8e8IEN1nzYPGuXeg0IpQ?pli=1&key=THlxVFhOdWNiMmxHZWxfUW9nbDhqX1NFZDJ1WlRR' },
         { key: 'menuImages', label: 'מתלבטים מה לאכול?', emoji: '🍽️', href: `/user/${userId}/menu` },
         { key: 'singles', label: 'רווקים? בואו להכיר', emoji: '💬', href: `/user/${userId}/singles` },
-        { key: 'gifts', label: 'פה מפנקים אותנו במתנה', emoji: '🎁', href: `/user/${userId}/gifts` },
+        { key: 'gifts', label: 'פה כותבים לנו ברכות (וגם נותנים מתנות)', emoji: '🎁', href: `/user/${userId}/gifts` },
         { key: 'rsvp-update', label: 'עדכון אישור הגעה', emoji: '✏️', href: `/rsvp/${userId}` },
     ];
 

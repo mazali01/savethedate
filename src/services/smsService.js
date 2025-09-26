@@ -3,7 +3,7 @@
  * This service handles generating personalized links and sending SMS invitations via SMS4Free
  */
 
-const BASE_URL = 'localhost:5173'; // Updated development server URL
+const BASE_URL = import.meta.env.VITE_BASE_URL || 'localhost:5173'; // Use environment variable for production
 
 // SMS4Free configuration
 const SMS4FREE_KEY = import.meta.env.VITE_SMS4FREE_KEY;
@@ -77,8 +77,7 @@ export const checkSMSBalance = async () => {
 
         return {
             success: true,
-            balance: responseData.status || responseData.available_sms || 0,
-            message: responseData.message || 'Balance retrieved successfully'
+            balance: responseData
         };
 
     } catch (error) {
@@ -114,19 +113,17 @@ export const checkSMSConfiguration = () => {
  * @param {string} userId - User document ID
  * @param {string} userName - User's name for personalization
  * @returns {Object} Link data with URL and message
+ * 
+ * Note: SMS provider allows 134 characters for first message
+ * Current template: ~110-130 characters (fits in single SMS)
  */
 export const generateInvitationLink = (userId, userName) => {
-    const invitationUrl = `http://${BASE_URL}/rsvp/${userId}`;
+    const invitationUrl = `https://${BASE_URL}/${userId}`;
 
-    const message = `🎉 שלום ${userName}!
-
-את/ה מוזמן/ת לחתונה של מזל וערן! 💒
-
-לחץ על הקישור כדי לאשר הגעה ולצפות בכל הפרטים:
-${invitationUrl}
-
-נשמח לחגוג איתך! ❤️
-מזל וערן`;
+    // Optimized message under 134 characters for single SMS
+    const message = `היי ${userName},
+אנחנו מתחתנים ורוצים אותך איתנו! 💍
+מחכות הפתעות בקישור: ${invitationUrl}`;
 
     return {
         url: invitationUrl,

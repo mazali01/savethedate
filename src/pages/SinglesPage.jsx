@@ -131,10 +131,7 @@ const SinglesPage = () => {
                                 <div className="profile-exists">
                                     <div className="profile-card-mini">
                                         <img src={userProfile.photoUrl} alt="תמונת פרופיל" />
-                                        <div>
-                                            <h4>{userProfile.name}</h4>
-                                            <p>הפרופיל שלך פעיל</p>
-                                        </div>
+                                        <h4>{userProfile.name}</h4>
                                     </div>
                                     <button
                                         className="edit-profile-btn"

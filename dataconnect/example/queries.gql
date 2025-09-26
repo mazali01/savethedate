@@ -1,60 +1,19 @@
-# Example queries for a simple movie app.
+# Queries for wedding gifts and blessings app
 
-# @auth() directives control who can call each operation.
-# Anyone should be able to list all movies, so the auth level is set to PUBLIC
-query ListMovies @auth(level: PUBLIC, insecureReason: "Anyone can list all movies.") {
-  movies {
+# List all public blessings with their reactions
+query ListPublicBlessings @auth(level: PUBLIC, insecureReason: "Anyone can see public blessings.") {
+  blessings(where: { isPublic: { eq: true } }, orderBy: { createdAt: DESC }) {
     id
-    title
-    imageUrl
-    genre
-  }
-}
-
-# List all users, only admins should be able to list all users, so we use NO_ACCESS
-query ListUsers @auth(level: NO_ACCESS) {
-  users {
-    id
-    username
-  }
-}
-
-# Logged in users can list all their reviews and movie titles associated with the review
-# Since the query uses the uid of the current authenticated user, we set auth level to USER
-query ListUserReviews @auth(level: USER) {
-  user(key: { id_expr: "auth.uid" }) {
-    id
-    username
-    # <field>_on_<foreign_key_field> makes it easy to grab info from another table
-    # Here, we use it to grab all the reviews written by the user.
-    reviews: reviews_on_user {
-      rating
-      reviewDate
-      reviewText
-      movie {
-        id
-        title
-      }
+    message
+    mediaUrl
+    mediaType
+    createdAt
+    user {
+      id
+      username
     }
-  }
-}
-
-# Get movie by id
-query GetMovieById($id: UUID!) @auth(level: PUBLIC, insecureReason: "Anyone can get a movie by id.") {
-  movie(id: $id) {
-    id
-    title
-    imageUrl
-    genre
-    metadata: movieMetadata_on_movie {
-      rating
-      releaseYear
-      description
-    }
-    reviews: reviews_on_movie {
-      reviewText
-      reviewDate
-      rating
+    reactions: reactions_on_blessing {
+      emoji
       user {
         id
         username
@@ -63,16 +22,63 @@ query GetMovieById($id: UUID!) @auth(level: PUBLIC, insecureReason: "Anyone can 
   }
 }
 
-# Search for movies, actors, and reviews
-query SearchMovie($titleInput: String, $genre: String) @auth(level: PUBLIC, insecureReason: "Anyone can search for movies.") {
-  movies(
-    where: {
-      _and: [{ genre: { eq: $genre } }, { title: { contains: $titleInput } }]
-    }
-  ) {
+# List all blessings for authenticated user (including private ones they created)
+query ListUserBlessings @auth(level: USER) {
+  user(key: { id_expr: "auth.uid" }) {
     id
-    title
-    genre
-    imageUrl
+    username
+    blessings: blessings_on_user(orderBy: { createdAt: DESC }) {
+      id
+      message
+      mediaUrl
+      mediaType
+      isPublic
+      createdAt
+      reactions: reactions_on_blessing {
+        emoji
+        user {
+          id
+          username
+        }
+      }
+    }
+  }
+}
+
+# Get a specific blessing with all its reactions
+query GetBlessing($id: UUID!) @auth(level: PUBLIC, insecureReason: "Public blessings can be viewed by anyone.") {
+  blessing(id: $id) {
+    id
+    message
+    mediaUrl
+    mediaType
+    isPublic
+    createdAt
+    user {
+      id
+      username
+    }
+    reactions: reactions_on_blessing {
+      emoji
+      createdAt
+      user {
+        id
+        username
+      }
+    }
+  }
+}
+
+# Get reaction counts for a blessing (grouped by emoji)
+query GetBlessingReactions($blessingId: UUID!) @auth(level: PUBLIC, insecureReason: "Anyone can see reaction counts.") {
+  blessing(id: $blessingId) {
+    id
+    reactions: reactions_on_blessing {
+      emoji
+      user {
+        id
+        username
+      }
+    }
   }
 }

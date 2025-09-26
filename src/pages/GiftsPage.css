@@ -1,0 +1,1171 @@
+/* GiftsPage.css - New Layout: Fixed Header, Scrollable Body, Fixed Footer */
+
+.gifts-container {
+  display: flex;
+  flex-direction: column;
+  height: 93vh;
+  background: linear-gradient(135deg, #ffeaa7, #fab1a0, #fd79a8);
+  direction: rtl;
+  font-family: 'Heebo', sans-serif;
+  overflow: hidden;
+}
+
+/* Fixed Header */
+.fixed-header {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(15px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 15px 20px;
+  z-index: 100;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.05);
+}
+
+.header-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding-top: 30px; /* Space for back button */
+}
+
+.header-title {
+  text-align: center;
+  margin: 0 0 15px 0;
+  font-size: 1.5rem;
+  color: #2d3436;
+  font-weight: 600;
+}
+
+/* Condensed Blessing Form */
+.condensed-blessing-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.textarea-container {
+  position: relative;
+  width: 100%;
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+}
+
+.condensed-textarea {
+  width: 100%;
+  padding: 12px 80px 12px 16px; /* WhatsApp-like padding with space for buttons */
+  border: 1px solid #e0e0e0;
+  border-radius: 24px; /* More rounded like WhatsApp */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-size: 14px; /* WhatsApp font size */
+  line-height: 1.4;
+  resize: none; /* WhatsApp doesn't allow manual resize */
+  direction: rtl;
+  background: #ffffff;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+  min-height: 44px; /* WhatsApp-like height */
+  max-height: 120px; /* Limit height like WhatsApp */
+  overflow-y: auto;
+  color: #111b21; /* WhatsApp text color */
+}
+
+.condensed-textarea::placeholder {
+  color: #8696a0; /* WhatsApp placeholder color */
+  opacity: 1;
+}
+
+.condensed-textarea:focus {
+  outline: none;
+  border-color: #00a884; /* WhatsApp green */
+  box-shadow: 0 0 0 1px rgba(0, 168, 132, 0.3);
+  background: #ffffff;
+}
+
+.textarea-buttons {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.attach-button-inside,
+.send-button-inside {
+  background: transparent !important;
+  border-radius: 50% !important;
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  color: #8696a0 !important; /* WhatsApp gray for inactive state */
+  transition: all 0.15s ease !important;
+}
+
+.attach-button-inside:hover {
+  background: rgba(134, 150, 160, 0.1) !important;
+  color: #54656f !important;
+}
+
+.send-button-inside:not(:disabled) {
+  color: #00a884 !important; /* WhatsApp green for send button */
+}
+
+.send-button-inside:not(:disabled):hover {
+  background: rgba(0, 168, 132, 0.1) !important;
+  transform: scale(1.05);
+}
+
+.send-button-inside:disabled {
+  color: #8696a0 !important;
+  cursor: not-allowed;
+}
+
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 4px 0 4px;
+  margin-top: 8px;
+}
+
+.privacy-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px; /* WhatsApp-like smaller font */
+  color: #667781; /* WhatsApp secondary text color */
+  cursor: pointer;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.privacy-checkbox input {
+  margin: 0;
+  accent-color: #00a884; /* WhatsApp green for checkbox */
+}
+
+.media-preview-small {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid #ddd;
+}
+
+.media-preview-small img,
+.media-preview-small video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.remove-media-small {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Scrollable Body */
+.scrollable-body {
+  flex: 1;
+  padding: 1em;
+  padding-bottom: 8em;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.feed-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Masonry Layout for Blessings */
+.blessings-masonry {
+  column-count: 1;
+  column-gap: 20px;
+  margin: 0 auto;
+}
+
+@media (min-width: 600px) {
+  .blessings-masonry {
+    column-count: 2;
+  }
+}
+
+@media (min-width: 900px) {
+  .blessings-masonry {
+    column-count: 3;
+  }
+}
+
+@media (min-width: 1200px) {
+  .blessings-masonry {
+    column-count: 4;
+  }
+}
+
+.blessing-card {
+  display: inline-block;
+  width: 100%;
+  margin-bottom: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transform: rotate(var(--rotation, 0deg));
+  transition: all 0.3s ease;
+  break-inside: avoid;
+}
+
+.blessing-card:hover {
+  transform: rotate(0deg) translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+.blessing-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.blessing-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, #fd79a8, #fdcb6e);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  margin-left: 12px;
+}
+
+.blessing-user-info {
+  flex: 1;
+}
+
+.blessing-username {
+  font-weight: 600;
+  color: #2d3436;
+  margin-bottom: 2px;
+}
+
+.blessing-date {
+  font-size: 0.8rem;
+  color: #636e72;
+}
+
+.blessing-media {
+  margin: 15px 0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.blessing-media img,
+.blessing-media video {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.blessing-message {
+  margin: 15px 0;
+  color: #2d3436;
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+.blessing-reactions {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.reaction-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.reaction-button {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  padding: 5px 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.reaction-button:hover {
+  background: rgba(116, 185, 255, 0.1);
+  border-color: #74b9ff;
+}
+
+.reaction-button.active {
+  background: #74b9ff;
+  color: white;
+  border-color: #74b9ff;
+}
+
+.reaction-count {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.existing-reactions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.existing-reaction {
+  background: rgba(116, 185, 255, 0.1);
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+}
+
+/* Loading and Empty States */
+.loading-spinner {
+  text-align: center;
+  padding: 40px;
+  color: #636e72;
+  font-size: 1.1rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #636e72;
+}
+
+.empty-state-icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+}
+
+.empty-state-text {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.empty-state-subtext {
+  font-size: 1rem;
+  opacity: 0.8;
+}
+
+.error-message {
+  text-align: center;
+  padding: 20px;
+  background: #ffe6e6;
+  color: #d32f2f;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+/* Fixed Footer */
+.fixed-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(2px);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  padding: 1em;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.footer-content {
+  max-width: 400px;
+  font-size: 1.25rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+}
+
+.footer-text {
+  color: #636e72;
+  font-weight: 500;
+}
+
+.payment-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.payment-button-footer {
+  background: linear-gradient(45deg, #74b9ff, #0984e3);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  min-width: 60px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.payment-logo {
+  height: 30px;
+  width: auto;
+  max-width: 50px;
+  object-fit: contain;
+}
+
+.payment-button-footer:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(116, 185, 255, 0.4);
+  text-decoration: none;
+  color: white;
+}
+
+/* Specific button styles */
+.bit-button {
+  background: white !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+.bit-button:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+}
+
+.paybox-button {
+  background: white !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+.paybox-button:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Notifications */
+.notification {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  padding: 15px 20px;
+  border-radius: 10px;
+  color: white;
+  font-weight: 500;
+  z-index: 1000;
+  max-width: 300px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.notification.success {
+  background: linear-gradient(45deg, #00b894, #00cec9);
+}
+
+.notification.error {
+  background: linear-gradient(45deg, #e74c3c, #fd79a8);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .fixed-header {
+    padding: 10px 15px;
+  }
+  
+  .header-title {
+    font-size: 1.3rem;
+  }
+  
+  .condensed-textarea {
+    font-size: 16px; /* Prevent zoom on iOS */
+    padding: 12px 70px 12px 16px; /* Maintain WhatsApp-like padding on mobile */
+    min-height: 44px; /* Keep consistent height */
+    border-radius: 22px; /* Slightly less rounded on mobile */
+  }
+  
+  .textarea-buttons {
+    bottom: 6px;
+    left: 6px;
+    gap: 4px; /* Tighter spacing on mobile */
+  }
+
+  .attach-button-inside,
+  .send-button-inside {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+  }
+}
+
+/* Remove old styles that are no longer needed */
+.back-button-container,
+.gifts-header,
+.gifts-title,
+.gifts-subtitle,
+.payment-section,
+.payment-section-bottom,
+.blessing-form-section {
+  display: none;
+}
+
+.gifts-title {
+  font-size: 2.5rem;
+  color: #2d3436;
+  margin-bottom: 10px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+
+.gifts-subtitle {
+  font-size: 1.2rem;
+  color: #636e72;
+  margin-bottom: 30px;
+}
+
+/* Payment Links Section */
+.payment-section {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: 30px;
+  margin-bottom: 40px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.payment-section h3 {
+  font-size: 1.8rem;
+  color: #2d3436;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.payment-options {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.payment-option {
+  background: linear-gradient(45deg, #6c5ce7, #a29bfe);
+  color: white;
+  padding: 20px 30px;
+  border-radius: 15px;
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-weight: bold;
+  box-shadow: 0 5px 15px rgba(108, 92, 231, 0.3);
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.payment-option:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(108, 92, 231, 0.4);
+  text-decoration: none;
+  color: white;
+}
+
+.payment-option:active {
+  transform: translateY(-1px);
+}
+
+/* Payment Section at Bottom - More Moderate Styling */
+.payment-section-bottom {
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 15px;
+  padding: 20px;
+  margin: 30px 0;
+  text-align: center;
+  border: 1px solid rgba(46, 125, 50, 0.2);
+}
+
+.payment-section-bottom h4 {
+  font-size: 1.2rem;
+  color: #636e72;
+  margin-bottom: 8px;
+  font-weight: normal;
+}
+
+.payment-options-compact {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.payment-option-small {
+  background: linear-gradient(45deg, #74b9ff, #0984e3);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 25px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(116, 185, 255, 0.3);
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  min-width: 80px;
+}
+
+.payment-option-small:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(116, 185, 255, 0.4);
+  text-decoration: none;
+  color: white;
+}
+
+/* Blessing Form Section */
+.blessing-form-section {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: 30px;
+  margin-bottom: 40px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.blessing-form {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: #2d3436;
+  font-size: 1.1rem;
+}
+
+.form-textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 15px;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+  transition: border-color 0.3s ease;
+}
+
+.form-textarea:focus {
+  outline: none;
+  border-color: #6c5ce7;
+  box-shadow: 0 0 10px rgba(108, 92, 231, 0.2);
+}
+
+.privacy-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.privacy-toggle input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: #6c5ce7;
+}
+
+.privacy-toggle label {
+  color: #636e72;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+/* Media Upload Section */
+.media-upload {
+  margin-bottom: 20px;
+}
+
+.dropzone {
+  border: 2px dashed #6c5ce7;
+  border-radius: 10px;
+  padding: 40px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: rgba(108, 92, 231, 0.05);
+}
+
+.dropzone:hover {
+  border-color: #a29bfe;
+  background: rgba(108, 92, 231, 0.1);
+}
+
+.dropzone.active {
+  border-color: #00cec9;
+  background: rgba(0, 206, 201, 0.1);
+}
+
+.dropzone-content {
+  pointer-events: none;
+}
+
+.dropzone-icon {
+  font-size: 3rem;
+  color: #6c5ce7;
+  margin-bottom: 10px;
+}
+
+.dropzone-text {
+  color: #636e72;
+  font-size: 1rem;
+}
+
+.media-preview {
+  margin-top: 20px;
+  position: relative;
+}
+
+.media-preview img,
+.media-preview video {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.media-remove {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(231, 76, 60, 0.9);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.submit-button {
+  width: 100%;
+  background: linear-gradient(45deg, #00cec9, #55efc4);
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 10px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(0, 206, 201, 0.3);
+}
+
+.submit-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 206, 201, 0.4);
+}
+
+.submit-button:disabled {
+  background: #b2bec3;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Blessings Feed Section */
+.blessings-feed {
+  margin-top: 40px;
+}
+
+.feed-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.feed-title {
+  font-size: 2rem;
+  color: #2d3436;
+  margin-bottom: 10px;
+}
+
+.feed-subtitle {
+  color: #636e72;
+  font-size: 1rem;
+}
+
+/* Masonry Layout for Blessings */
+.blessings-masonry {
+  column-count: 1;
+  column-gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media (min-width: 600px) {
+  .blessings-masonry {
+    column-count: 2;
+  }
+}
+
+@media (min-width: 900px) {
+  .blessings-masonry {
+    column-count: 3;
+  }
+}
+
+@media (min-width: 1200px) {
+  .blessings-masonry {
+    column-count: 4;
+  }
+}
+
+/* Individual Blessing Card */
+.blessing-card {
+  break-inside: avoid;
+  margin-bottom: 20px;
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  transform: rotate(var(--rotation, 0deg));
+  transition: all 0.3s ease;
+  position: relative;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+
+.blessing-card:hover {
+  transform: rotate(0deg) translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+.blessing-card::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  background: linear-gradient(45deg, #6c5ce7, #a29bfe, #fd79a8, #fdcb6e);
+  border-radius: 18px;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.blessing-card:hover::before {
+  opacity: 1;
+}
+
+.blessing-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.blessing-avatar {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(45deg, #6c5ce7, #a29bfe);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.blessing-user-info {
+  flex: 1;
+}
+
+.blessing-username {
+  font-weight: bold;
+  color: #2d3436;
+  margin-bottom: 2px;
+}
+
+.blessing-date {
+  font-size: 0.85rem;
+  color: #636e72;
+}
+
+.blessing-media {
+  margin-bottom: 15px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.blessing-media img,
+.blessing-media video {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.blessing-message {
+  color: #2d3436;
+  line-height: 1.6;
+  margin-bottom: 15px;
+  font-size: 1rem;
+}
+
+/* Reactions Section */
+.blessing-reactions {
+  border-top: 1px solid #ddd;
+  padding-top: 15px;
+}
+
+.reaction-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.reaction-button {
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.reaction-button:hover {
+  background: #f8f9fa;
+  border-color: #6c5ce7;
+}
+
+.reaction-button.active {
+  background: #6c5ce7;
+  border-color: #6c5ce7;
+  color: white;
+}
+
+.reaction-count {
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.existing-reactions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.existing-reaction {
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 15px;
+  padding: 4px 8px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.existing-reaction .count {
+  font-weight: bold;
+  color: #6c5ce7;
+}
+
+/* Loading States */
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px;
+  font-size: 1.1rem;
+  color: #636e72;
+}
+
+.loading-spinner::after {
+  content: '';
+  width: 20px;
+  height: 20px;
+  border: 2px solid #6c5ce7;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 10px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Error States */
+.error-message {
+  background: #ffe0e0;
+  color: #d63031;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  text-align: center;
+  border: 1px solid #fab1a0;
+}
+
+/* Success States */
+.success-message {
+  background: #e8f5e8;
+  color: #00b894;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  text-align: center;
+  border: 1px solid #55efc4;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #636e72;
+}
+
+.empty-state-icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+  opacity: 0.5;
+}
+
+.empty-state-text {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+}
+
+.empty-state-subtext {
+  font-size: 1rem;
+  opacity: 0.7;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .gifts-title {
+    font-size: 2rem;
+  }
+  
+  .payment-options {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .payment-option {
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .blessing-form-section,
+  .payment-section {
+    padding: 20px;
+  }
+  
+  .blessings-masonry {
+    column-count: 1 !important;
+  }
+}
+
+/* Animation for new cards */
+.blessing-card.new-card {
+  animation: slideInUp 0.6s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) rotate(var(--rotation, 0deg));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(var(--rotation, 0deg));
+  }
+}
+
+/* Notification styles */
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: white;
+  padding: 15px 20px;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  animation: slideInRight 0.3s ease-out;
+  max-width: 300px;
+}
+
+.notification.success {
+  border-left: 4px solid #00b894;
+}
+
+.notification.error {
+  border-left: 4px solid #d63031;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Custom scrollbar */
+.gifts-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.gifts-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.gifts-container::-webkit-scrollbar-thumb {
+  background: rgba(108, 92, 231, 0.3);
+  border-radius: 4px;
+}
+
+.gifts-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(108, 92, 231, 0.5);
+}

@@ -181,6 +181,7 @@ const AnimatedRoutes = () => {
       >
         <Routes location={location}>
           <Route path="/" element={<AdminPage />} />
+          <Route path="/:userId" element={<RsvpPage />} />
           <Route path="/rsvp/:userId" element={<RsvpPage />} />
           <Route path="/user/:userId" element={<UserRouteWrapper><WeddingMenu /></UserRouteWrapper>} />
           <Route path="/user/:userId/nav" element={<UserRouteWrapper><NavPage /></UserRouteWrapper>} />
@@ -228,4 +229,6 @@ function App() {
       </ThemeProvider>
     </CacheProvider>
   );
-} export default App
+}
+
+export default App;
