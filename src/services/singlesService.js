@@ -1,14 +1,11 @@
 import {
     collection,
     doc,
-    addDoc,
     updateDoc,
-    deleteDoc,
     getDocs,
     getDoc,
     query,
     where,
-    orderBy,
     setDoc
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';

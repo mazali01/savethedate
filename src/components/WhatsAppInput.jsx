@@ -135,14 +135,6 @@ const WhatsAppInput = ({
         }
     };
 
-    // Handle voice message submission (allow without text)
-    const handleVoiceSubmit = () => {
-        if (mediaPreview) {
-            const fakeEvent = { preventDefault: () => { } };
-            onSubmit(fakeEvent);
-        }
-    };
-
     // Handle voice recording
     const handleVoiceRecordingComplete = (audioBlob) => {
         const audioUrl = URL.createObjectURL(audioBlob);

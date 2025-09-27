@@ -8,6 +8,8 @@ import { prefixer } from 'stylis';
 import rtlPlugin from 'stylis-plugin-rtl';
 import CssBaseline from '@mui/material/CssBaseline';
 import { AnimatePresence, motion } from 'framer-motion';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
 
 import RingVideo from './components/RingVideo';
 import WhiteCurtain from './components/WhiteCurtain';
@@ -16,6 +18,7 @@ import UserRouteWrapper from './components/UserRouteWrapper';
 
 // Pages
 import RsvpPage from './pages/RsvpPage';
+import WelcomeLanding from './components/WelcomeLanding';
 import NavPage from './pages/NavPage';
 import GiftsPage from './pages/GiftsPage';
 import MenuPage from './pages/MenuPage';
@@ -23,6 +26,22 @@ import SongsPage from './pages/SongsPage';
 import CarpoolPage from './pages/CarpoolPage';
 import SinglesPage from './pages/SinglesPage';
 import AdminPage from './pages/AdminPage';
+
+// Create React Query client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+      retry: 2,
+      refetchOnWindowFocus: true,
+      refetchOnReconnect: true,
+    },
+    mutations: {
+      retry: 1,
+    },
+  },
+});
 
 // Create RTL cache
 const cacheRtl = createCache({
@@ -181,7 +200,7 @@ const AnimatedRoutes = () => {
       >
         <Routes location={location}>
           <Route path="/" element={<AdminPage />} />
-          <Route path="/:userId" element={<RsvpPage />} />
+          <Route path="/:userId" element={<WelcomeLanding />} />
           <Route path="/rsvp/:userId" element={<RsvpPage />} />
           <Route path="/user/:userId" element={<UserRouteWrapper><WeddingMenu /></UserRouteWrapper>} />
           <Route path="/user/:userId/nav" element={<UserRouteWrapper><NavPage /></UserRouteWrapper>} />
@@ -198,36 +217,38 @@ const AnimatedRoutes = () => {
 
 function App() {
   return (
-    <CacheProvider value={cacheRtl}>
-      <ThemeProvider theme={lightTheme}>
-        <CssBaseline />
-        <Router>
-          <div style={{
-            position: 'relative',
-            width: '100%',
-            height: '100vh',
-            overflow: 'auto',
-            WebkitOverflowScrolling: 'touch'
-          }}>
-            {/* Background layers - always visible */}
-            <WhiteCurtain />
-            <div style={{ position: 'fixed', top: 0, left: 0, zIndex: 1, width: '100%', pointerEvents: 'none', display: 'flex', justifyContent: 'center' }}>
-              <RingVideo />
-            </div>
-
-            {/* Animated Routes - now in scrollable container */}
+    <QueryClientProvider client={queryClient}>
+      <CacheProvider value={cacheRtl}>
+        <ThemeProvider theme={lightTheme}>
+          <CssBaseline />
+          <Router>
             <div style={{
               position: 'relative',
-              zIndex: 2,
               width: '100%',
-              height: '100%',
+              height: '100vh',
+              overflow: 'auto',
+              WebkitOverflowScrolling: 'touch'
             }}>
-              <AnimatedRoutes />
+              {/* Background layers - always visible */}
+              <WhiteCurtain />
+              <div style={{ position: 'fixed', top: 0, left: 0, zIndex: 1, width: '100%', pointerEvents: 'none', display: 'flex', justifyContent: 'center' }}>
+                <RingVideo />
+              </div>
+
+              {/* Animated Routes - now in scrollable container */}
+              <div style={{
+                position: 'relative',
+                zIndex: 2,
+                width: '100%',
+                height: '100%',
+              }}>
+                <AnimatedRoutes />
+              </div>
             </div>
-          </div>
-        </Router>
-      </ThemeProvider>
-    </CacheProvider>
+          </Router>
+        </ThemeProvider>
+      </CacheProvider>
+    </QueryClientProvider>
   );
 }
 

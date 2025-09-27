@@ -9,7 +9,7 @@ const CarpoolPage = () => {
     const { userId } = useParams();
     const [currentView, setCurrentView] = useState('browse'); // 'browse' or 'offer'
 
-    const handleOfferCreated = (offer) => {
+    const handleOfferCreated = () => {
         alert('הצעת הטרמפ שלך פורסמה בהצלחה!');
         setCurrentView('browse');
     };

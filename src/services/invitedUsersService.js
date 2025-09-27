@@ -3,6 +3,7 @@ import {
     addDoc,
     getDocs,
     doc,
+    getDoc,
     updateDoc,
     deleteDoc,
     query,
@@ -25,6 +26,23 @@ export const createInvitedUser = async (userData) => {
         return { id: docRef.id, ...userWithDefaults };
     } catch (error) {
         console.error('Error creating invited user:', error);
+        throw error;
+    }
+};
+
+// Get invited user by ID
+export const getInvitedUserById = async (userId) => {
+    try {
+        const userRef = doc(db, COLLECTION_NAME, userId);
+        const docSnap = await getDoc(userRef);
+
+        if (docSnap.exists()) {
+            return { id: docSnap.id, ...docSnap.data() };
+        } else {
+            return null;
+        }
+    } catch (error) {
+        console.error('Error fetching invited user by ID:', error);
         throw error;
     }
 };

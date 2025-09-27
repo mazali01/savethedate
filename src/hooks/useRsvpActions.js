@@ -1,5 +1,4 @@
 import { useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useSubmitRsvp } from '../api/rsvp';
 
 /**
@@ -7,7 +6,6 @@ import { useSubmitRsvp } from '../api/rsvp';
  * Separates business logic from UI components
  */
 export const useRsvpActions = (userId, user) => {
-    const navigate = useNavigate();
     const submitRsvpMutation = useSubmitRsvp();
 
     const handleNotComing = useCallback(async () => {

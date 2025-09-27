@@ -1,0 +1,35 @@
+/* Custom styles for SongsPage */
+.futuristic-search-input::placeholder {
+    color: rgba(255, 255, 255, 0.6) !important;
+    text-align: right;
+    direction: rtl;
+}
+
+.futuristic-search-input::-webkit-input-placeholder {
+    color: rgba(255, 255, 255, 0.6);
+    text-align: right;
+}
+
+.futuristic-search-input::-moz-placeholder {
+    color: rgba(255, 255, 255, 0.6);
+    text-align: right;
+}
+
+.futuristic-search-input:-ms-input-placeholder {
+    color: rgba(255, 255, 255, 0.6);
+    text-align: right;
+}
+
+/* Custom scrollbar */
+.futuristic-scrollbar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.futuristic-scrollbar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.futuristic-scrollbar::-webkit-scrollbar-thumb {
+    background: #00ffff;
+    border-radius: 4px;
+}

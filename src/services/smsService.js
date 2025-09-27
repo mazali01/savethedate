@@ -16,7 +16,6 @@ let smsConfigured = false;
 try {
     if (SMS4FREE_KEY && SMS4FREE_USER && SMS4FREE_PASS) {
         smsConfigured = true;
-        console.log('✅ SMS4Free configuration found');
     } else {
         console.warn('⚠️ SMS4Free not configured. Please set VITE_SMS4FREE_KEY, VITE_SMS4FREE_USER, and VITE_SMS4FREE_PASS in your .env file');
     }
@@ -296,7 +295,7 @@ export const copyLinkToClipboard = async (link) => {
     try {
         await navigator.clipboard.writeText(link);
         return true;
-    } catch (error) {
+    } catch {
         // Fallback for older browsers
         const textArea = document.createElement('textarea');
         textArea.value = link;
