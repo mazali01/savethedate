@@ -15,7 +15,7 @@ import CalendarButtons from '../AddCalendar';
 const weddingEvent = {
     title: 'חתונת מזל וערן',
     description: 'בואו לחגוג איתנו את היום הכי שמח שלנו!',
-    location: 'גן אירועים הגליל, כפר ורדים',
+    location: 'הבית - רעננה',
     start: new Date('2025-10-16T19:00:00'),
     end: new Date('2025-10-17T02:00:00')
 };
