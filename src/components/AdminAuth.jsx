@@ -24,7 +24,7 @@ const AdminAuth = ({ onAuthenticated }) => {
     };
 
     // Pre-computed hash of the password (SHA-256)
-    const ADMIN_PASSWORD_HASH = 'b4f659816b66337502bf7bfcd44d334f100f383abc9133bef9e8105e97b9fc93';
+    const ADMIN_PASSWORD_HASH = 'e038b037dae5155aed43f2d01e5066991cf07d17b592daf87f9517c31c7a73f3';
 
     const handleSubmit = async (e) => {
         e.preventDefault();

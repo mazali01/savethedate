@@ -69,6 +69,9 @@ function WelcomeLanding() {
             >
                 <ArrowBack />
                 <span className="slide-text">החלק להמשך</span>
+                <div className="slide-ripple-container">
+                    <div className="slide-ripple-lightning" />
+                </div>
             </div>
         </div>
     );
