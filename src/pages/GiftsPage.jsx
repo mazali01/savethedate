@@ -16,7 +16,8 @@ import {
   useAddReaction,
   useRemoveReaction,
   useDeleteBlessing,
-  useUpsertUser
+  useUpsertUser,
+  useUpdateBlessingPrivacy
 } from '../api';
 import './GiftsPage.css';
 
@@ -39,7 +40,7 @@ const GiftsPage = () => {
     isFetchingNextPage,
     isLoading,
     error: blessingsError
-  } = usePaginatedBlessings();
+  } = usePaginatedBlessings(userId);
 
   const uploadMediaMutation = useUploadMediaFile();
   const createBlessingMutation = useCreateBlessing();
@@ -47,6 +48,7 @@ const GiftsPage = () => {
   const removeReactionMutation = useRemoveReaction();
   const deleteBlessingMutation = useDeleteBlessing();
   const upsertUserMutation = useUpsertUser();
+  const updateBlessingPrivacyMutation = useUpdateBlessingPrivacy();
 
   const blessings = useMemo(() => {
     if (!data?.pages) return [];
@@ -238,6 +240,29 @@ const GiftsPage = () => {
     }
   };
 
+  // Handle blessing privacy toggle
+  const handleToggleBlessingPrivacy = async (blessingId, currentIsPublic) => {
+    if (!user) {
+      showNotification('אנא התחבר כדי לשנות הגדרות פרטיות', 'error');
+      return;
+    }
+
+    try {
+      await updateBlessingPrivacyMutation.mutateAsync({
+        blessingId,
+        isPublic: !currentIsPublic
+      });
+
+      showNotification(
+        !currentIsPublic ? 'הברכה הפכה לציבורית' : 'הברכה הפכה לפרטית',
+        'success'
+      );
+    } catch (error) {
+      console.error('Error updating blessing privacy:', error);
+      showNotification(error.message || 'שגיאה בעדכון הגדרות הפרטיות', 'error');
+    }
+  };
+
   // Handle emoji picker open
   const handleEmojiPickerOpen = (event, blessingId) => {
     setEmojiPickerAnchor(event.currentTarget);
@@ -351,6 +376,7 @@ const GiftsPage = () => {
               user={user || null}
               onReaction={handleReaction || (() => { })}
               onDeleteBlessing={handleDeleteBlessing || (() => { })}
+              onToggleBlessingPrivacy={handleToggleBlessingPrivacy || (() => { })}
               onEmojiPickerOpen={handleEmojiPickerOpen || (() => { })}
               getUserReaction={getUserReaction || (() => null)}
             />

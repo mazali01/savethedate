@@ -123,42 +123,66 @@ export const getPublicBlessings = async () => {
 };
 
 // Get paginated public blessings for infinite scrolling
-export const getPaginatedBlessings = async (pageSize = 10, lastDocId = null) => {
+export const getPaginatedBlessings = async (pageSize = 10, lastDocId = null, userId = null) => {
   try {
-    let q = query(
-      collection(db, 'blessings'),
-      where('isPublic', '==', true),
-      orderBy('createdAt', 'desc'),
-      limit(pageSize)
-    );
+    let q;
+
+    if (userId) {
+      // If user is provided, fetch both public blessings and user's private blessings
+      q = query(
+        collection(db, 'blessings'),
+        orderBy('createdAt', 'desc'),
+        limit(pageSize)
+      );
+    } else {
+      // If no user, only fetch public blessings
+      q = query(
+        collection(db, 'blessings'),
+        where('isPublic', '==', true),
+        orderBy('createdAt', 'desc'),
+        limit(pageSize)
+      );
+    }
 
     // If we have a lastDocId, start after that document
     if (lastDocId) {
       const lastDocRef = doc(db, 'blessings', lastDocId);
       const lastDocSnap = await getDoc(lastDocRef);
       if (lastDocSnap.exists()) {
-        q = query(
-          collection(db, 'blessings'),
-          where('isPublic', '==', true),
-          orderBy('createdAt', 'desc'),
-          startAfter(lastDocSnap),
-          limit(pageSize)
-        );
+        if (userId) {
+          q = query(
+            collection(db, 'blessings'),
+            orderBy('createdAt', 'desc'),
+            startAfter(lastDocSnap),
+            limit(pageSize)
+          );
+        } else {
+          q = query(
+            collection(db, 'blessings'),
+            where('isPublic', '==', true),
+            orderBy('createdAt', 'desc'),
+            startAfter(lastDocSnap),
+            limit(pageSize)
+          );
+        }
       }
     }
 
     const querySnapshot = await getDocs(q);
-    const blessings = [];
+    let blessings = [];
 
     for (const docSnap of querySnapshot.docs) {
       const blessingData = { id: docSnap.id, ...docSnap.data() };
 
-      // Get reactions for this blessing
-      const reactionsQ = query(collection(db, 'reactions'), where('blessingId', '==', docSnap.id));
-      const reactionsSnapshot = await getDocs(reactionsQ);
-      blessingData.reactions = reactionsSnapshot.docs.map(rDoc => ({ id: rDoc.id, ...rDoc.data() }));
+      // Filter blessings: show public ones and user's private ones
+      if (blessingData.isPublic || (userId && blessingData.userId === userId)) {
+        // Get reactions for this blessing
+        const reactionsQ = query(collection(db, 'reactions'), where('blessingId', '==', docSnap.id));
+        const reactionsSnapshot = await getDocs(reactionsQ);
+        blessingData.reactions = reactionsSnapshot.docs.map(rDoc => ({ id: rDoc.id, ...rDoc.data() }));
 
-      blessings.push(blessingData);
+        blessings.push(blessingData);
+      }
     }
 
     return {
@@ -395,4 +419,19 @@ export const groupReactionsByEmoji = (reactions) => {
   });
 
   return grouped;
+};
+
+// Update blessing privacy status
+export const updateBlessingPrivacy = async (blessingId, isPublic) => {
+  try {
+    const blessingRef = doc(db, 'blessings', blessingId);
+    await updateDoc(blessingRef, {
+      isPublic: isPublic,
+      updatedAt: new Date()
+    });
+    return true;
+  } catch (error) {
+    console.error('Error updating blessing privacy:', error);
+    throw error;
+  }
 };

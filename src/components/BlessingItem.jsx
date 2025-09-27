@@ -3,6 +3,8 @@ import { motion } from 'framer-motion'; // eslint-disable-line
 import { IconButton, CircularProgress, Popover, Typography } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddReactionIcon from '@mui/icons-material/AddReaction';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { formatDate, groupReactionsByEmoji, getCommonEmojis } from '../services/giftService';
 
 const BlessingItem = ({
@@ -11,6 +13,7 @@ const BlessingItem = ({
   user,
   onReaction,
   onDeleteBlessing,
+  onToggleBlessingPrivacy,
   onEmojiPickerOpen,
   getUserReaction,
   setupResizeObserver
@@ -76,25 +79,52 @@ const BlessingItem = ({
         </div>
         {/* Delete button - only show for user's own blessings */}
         {user && blessing.userId === user.id && (
-          <IconButton
-            onClick={() => onDeleteBlessing(blessing.id)}
-            size="small"
-            className="delete-blessing-button"
-            sx={{
-              marginRight: 'auto',
-              color: '#dc3545',
-              opacity: 0.7,
-              '&:hover': {
-                opacity: 1,
-                backgroundColor: 'rgba(220, 53, 69, 0.1)',
-              },
-            }}
-            title="מחק ברכה"
-          >
-            <DeleteIcon fontSize="small" />
-          </IconButton>
+          <>
+            <IconButton
+              onClick={() => onToggleBlessingPrivacy(blessing.id, blessing.isPublic)}
+              size="small"
+              className="privacy-toggle-button"
+              sx={{
+                marginRight: '4px',
+                color: blessing.isPublic ? '#74b9ff' : '#fdcb6e',
+                opacity: 0.7,
+                '&:hover': {
+                  opacity: 1,
+                  backgroundColor: blessing.isPublic ? 'rgba(116, 185, 255, 0.1)' : 'rgba(253, 203, 110, 0.1)',
+                },
+              }}
+              title={blessing.isPublic ? 'הפוך לפרטי' : 'הפוך לציבורי'}
+            >
+              {blessing.isPublic ? <VisibilityIcon fontSize="small" /> : <VisibilityOffIcon fontSize="small" />}
+            </IconButton>
+            <IconButton
+              onClick={() => onDeleteBlessing(blessing.id)}
+              size="small"
+              className="delete-blessing-button"
+              sx={{
+                marginRight: 'auto',
+                color: '#dc3545',
+                opacity: 0.7,
+                '&:hover': {
+                  opacity: 1,
+                  backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                },
+              }}
+              title="מחק ברכה"
+            >
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </>
         )}
       </div>
+
+      {/* Privacy indicator for private blessings */}
+      {user && blessing.userId === user.id && !blessing.isPublic && (
+        <div className="private-blessing-badge">
+          <span className="private-icon">🔒</span>
+          <span className="private-text">ברכה פרטית - רק אתם והזוג יכולים לראות</span>
+        </div>
+      )}
 
       {/* Media Display - Support both single and multiple media */}
       {(blessing.mediaUrl || (blessing.mediaUrls && blessing.mediaUrls.length > 0)) && (

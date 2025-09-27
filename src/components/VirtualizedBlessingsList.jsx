@@ -10,6 +10,7 @@ const VirtualizedBlessingsList = ({
   user,
   onReaction,
   onDeleteBlessing,
+  onToggleBlessingPrivacy,
   onEmojiPickerOpen,
   getUserReaction,
 }) => {
@@ -100,6 +101,7 @@ const VirtualizedBlessingsList = ({
                   user={user}
                   onReaction={onReaction}
                   onDeleteBlessing={onDeleteBlessing}
+                  onToggleBlessingPrivacy={onToggleBlessingPrivacy}
                   onEmojiPickerOpen={onEmojiPickerOpen}
                   getUserReaction={getUserReaction}
                   setupResizeObserver={(element) => {

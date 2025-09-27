@@ -8,7 +8,8 @@ import {
   addReaction,
   removeReaction,
   deleteBlessing,
-  upsertUser
+  upsertUser,
+  updateBlessingPrivacy
 } from '../services/giftService';
 
 // Query Keys
@@ -28,10 +29,10 @@ export const usePublicBlessings = () => {
   });
 };
 
-export const usePaginatedBlessings = () => {
+export const usePaginatedBlessings = (userId = null) => {
   return useInfiniteQuery({
-    queryKey: GIFTS_QUERY_KEYS.paginatedBlessings,
-    queryFn: ({ pageParam = null }) => getPaginatedBlessings(10, pageParam),
+    queryKey: [...GIFTS_QUERY_KEYS.paginatedBlessings, userId],
+    queryFn: ({ pageParam = null }) => getPaginatedBlessings(10, pageParam, userId),
     getNextPageParam: (lastPage) => {
       return lastPage.hasMore ? lastPage.lastDocId : undefined;
     },
@@ -113,5 +114,18 @@ export const useDeleteBlessing = () => {
 export const useUpsertUser = () => {
   return useMutation({
     mutationFn: ({ userId, userData }) => upsertUser(userId, userData),
+  });
+};
+
+export const useUpdateBlessingPrivacy = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ blessingId, isPublic }) => updateBlessingPrivacy(blessingId, isPublic),
+    onSuccess: () => {
+      // Invalidate and refetch blessings to show updated privacy status
+      queryClient.invalidateQueries({ queryKey: GIFTS_QUERY_KEYS.blessings });
+      queryClient.invalidateQueries({ queryKey: GIFTS_QUERY_KEYS.paginatedBlessings });
+    },
   });
 };
