@@ -1,5 +1,5 @@
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { collection, addDoc, getDocs, query, where, orderBy, deleteDoc, doc, updateDoc, getDoc, setDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where, orderBy, deleteDoc, doc, updateDoc, getDoc, setDoc, limit, startAfter } from 'firebase/firestore';
 import { storage, db } from '../config/firebase';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -7,7 +7,17 @@ import { v4 as uuidv4 } from 'uuid';
 export const uploadMediaFile = async (file, folder = 'blessings') => {
   try {
     // Create a unique filename
-    const fileExtension = file.name.split('.').pop();
+    let fileExtension = 'webm'; // Default for audio blobs
+
+    if (file.name) {
+      // Regular file with name
+      fileExtension = file.name.split('.').pop();
+    } else if (file.type) {
+      // Blob with type (e.g., audio/webm)
+      const mimeType = file.type.split('/').pop();
+      fileExtension = mimeType === 'webm' ? 'webm' : mimeType;
+    }
+
     const fileName = `${uuidv4()}.${fileExtension}`;
     const storageRef = ref(storage, `${folder}/${fileName}`);
 
@@ -112,6 +122,56 @@ export const getPublicBlessings = async () => {
   }
 };
 
+// Get paginated public blessings for infinite scrolling
+export const getPaginatedBlessings = async (pageSize = 10, lastDocId = null) => {
+  try {
+    let q = query(
+      collection(db, 'blessings'),
+      where('isPublic', '==', true),
+      orderBy('createdAt', 'desc'),
+      limit(pageSize)
+    );
+
+    // If we have a lastDocId, start after that document
+    if (lastDocId) {
+      const lastDocRef = doc(db, 'blessings', lastDocId);
+      const lastDocSnap = await getDoc(lastDocRef);
+      if (lastDocSnap.exists()) {
+        q = query(
+          collection(db, 'blessings'),
+          where('isPublic', '==', true),
+          orderBy('createdAt', 'desc'),
+          startAfter(lastDocSnap),
+          limit(pageSize)
+        );
+      }
+    }
+
+    const querySnapshot = await getDocs(q);
+    const blessings = [];
+
+    for (const docSnap of querySnapshot.docs) {
+      const blessingData = { id: docSnap.id, ...docSnap.data() };
+
+      // Get reactions for this blessing
+      const reactionsQ = query(collection(db, 'reactions'), where('blessingId', '==', docSnap.id));
+      const reactionsSnapshot = await getDocs(reactionsQ);
+      blessingData.reactions = reactionsSnapshot.docs.map(rDoc => ({ id: rDoc.id, ...rDoc.data() }));
+
+      blessings.push(blessingData);
+    }
+
+    return {
+      blessings,
+      hasMore: querySnapshot.docs.length === pageSize,
+      lastDocId: querySnapshot.docs.length > 0 ? querySnapshot.docs[querySnapshot.docs.length - 1].id : null
+    };
+  } catch (error) {
+    console.error('Error getting paginated blessings:', error);
+    throw error;
+  }
+};
+
 export const getUserBlessings = async (userId) => {
   try {
     const q = query(
@@ -141,8 +201,11 @@ export const getUserBlessings = async (userId) => {
   }
 };
 
-export const addReaction = async (blessingId, userId, username, emoji) => {
+export const addReaction = async (blessingId, userId, username, emojisOrEmoji) => {
   try {
+    // Handle both single emoji (old format) and multiple emojis (new format)
+    const emojis = Array.isArray(emojisOrEmoji) ? emojisOrEmoji : [emojisOrEmoji];
+
     // Check if user already has a reaction for this blessing
     const reactionsQ = query(
       collection(db, 'reactions'),
@@ -155,7 +218,9 @@ export const addReaction = async (blessingId, userId, username, emoji) => {
       // Update existing reaction
       const existingDoc = existingReactions.docs[0];
       await updateDoc(doc(db, 'reactions', existingDoc.id), {
-        emoji,
+        emojis,
+        // Keep backward compatibility
+        emoji: emojis[0],
         createdAt: new Date()
       });
     } else {
@@ -164,7 +229,9 @@ export const addReaction = async (blessingId, userId, username, emoji) => {
         blessingId,
         userId,
         username,
-        emoji,
+        emojis,
+        // Keep backward compatibility
+        emoji: emojis[0],
         createdAt: new Date()
       });
     }
@@ -256,30 +323,15 @@ export const upsertUser = async (userId, userData) => {
   }
 };
 
-// Create payment links for Bit and PayBox
 export const createPaymentLinks = () => {
   return {
     bit: {
-      // For Bit, users need to:
-      // 1. Open Bit app
-      // 2. Go to "Request Money" or "Send Money"
-      // 3. Enter your phone number
-      // You can also create a Bit.ly link that opens the Bit app with pre-filled info
-      url: `https://bit.ly/3A1B2C3`, // Replace with your actual Bit link
-      phone: '+972-50-123-4567', // Replace with your actual phone number
+      url: `https://www.bitpay.co.il/app/me/8960D4FC-2726-3863-AC5F-847FBB3C9D231C50`,
       displayText: 'העבירו דרך Bit',
-      instructions: 'לתשלום דרך Bit - לחצו על הקישור או חייגו 050-123-4567',
-      qrText: 'bit://pay/0501234567' // This creates a QR that opens Bit app
     },
     paybox: {
-      // For PayBox, you need to:
-      // 1. Sign up to PayBox business account at https://payboxapp.com
-      // 2. Create a payment page 
-      // 3. Get the payment page link
-      url: 'https://payboxapp.com/checkout/your-business-id', // Replace with your actual PayBox checkout link
+      url: 'https://links.payboxapp.com/BW58kFmIYWb',
       displayText: 'תשלום דרך PayBox',
-      instructions: 'לתשלום דרך PayBox - לחצו על הקישור ובחרו את הסכום',
-      businessId: 'your-business-id' // Your PayBox business ID
     }
   };
 };
@@ -302,9 +354,10 @@ export const generatePaymentQR = (paymentType, amount = null) => {
   return qrData;
 };
 
-// Common emoji reactions
+// Common emoji reactions - expanded list for horizontal scrolling
 export const getCommonEmojis = () => [
-  '❤️', '😍', '🙌', '🥳', '😂'
+  '❤️', '😍', '🙌', '🥳', '😂', '👏', '🎉', '😊', '🥰', '💕',
+  '🔥', '✨', '💯', '🙏', '😘', '🤗', '😭', '🥺', '💪', '🎊'
 ];
 
 // Format date for display in Hebrew
@@ -325,12 +378,19 @@ export const groupReactionsByEmoji = (reactions) => {
   const grouped = {};
 
   reactions.forEach(reaction => {
-    if (!grouped[reaction.emoji]) {
-      grouped[reaction.emoji] = [];
-    }
-    grouped[reaction.emoji].push({
-      id: reaction.userId,
-      username: reaction.username
+    // Handle both old format (single emoji) and new format (multiple emojis)
+    const emojis = reaction.emojis || [reaction.emoji];
+
+    emojis.forEach(emoji => {
+      if (emoji) {
+        if (!grouped[emoji]) {
+          grouped[emoji] = [];
+        }
+        grouped[emoji].push({
+          id: reaction.userId,
+          username: reaction.username
+        });
+      }
     });
   });
 

@@ -1,44 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import { getMatchingSinglesProfiles, getSinglesProfile } from '../../services/singlesService';
+import React, { useState } from 'react';
+import { useSinglesProfile, useMatchingSinglesProfiles } from '../../api';
 import SwipeableProfileCards from './SwipeableProfileCards';
 import './SinglesBrowser.css';
 
 const SinglesBrowser = ({ currentUserId }) => {
-    const [profiles, setProfiles] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
 
-    useEffect(() => {
-        fetchMatchingProfiles();
-    }, [currentUserId]);
+    // Get current user's profile to determine matching criteria
+    const { data: userProfile, isLoading: profileLoading, error: profileError } = useSinglesProfile(currentUserId);
 
-    const fetchMatchingProfiles = async () => {
-        try {
-            setIsLoading(true);
+    // Get matching profiles based on user's preferences
+    const {
+        data: profiles = [],
+        isLoading: profilesLoading,
+        error: profilesError
+    } = useMatchingSinglesProfiles(
+        userProfile?.gender,
+        userProfile?.interestedIn,
+        currentUserId
+    );
 
-            // First get current user's profile to know their preferences
-            const userProfile = await getSinglesProfile(currentUserId);
+    const isLoading = profileLoading || profilesLoading;
 
-            if (!userProfile) {
-                setError('לא נמצא פרופיל. יש ליצור פרופיל קודם.');
-                return;
-            }
-
-            // Get matching profiles based on user's gender and interests
-            const matchingProfiles = await getMatchingSinglesProfiles(
-                userProfile.gender,
-                userProfile.interestedIn,
-                currentUserId
-            );
-
-            setProfiles(matchingProfiles);
-        } catch (err) {
-            console.error('Error fetching matching profiles:', err);
-            setError('שגיאה בטעינת הפרופילים');
-        } finally {
-            setIsLoading(false);
+    // Handle errors
+    React.useEffect(() => {
+        if (profileError) {
+            setError('לא נמצא פרופיל. יש ליצור פרופיל קודם.');
+        } else if (profilesError) {
+            setError('שגיאה בטעינת פרופילי הרווקים');
+        } else {
+            setError('');
         }
-    };
+    }, [profileError, profilesError]);
 
     if (isLoading) {
         return (
@@ -56,7 +49,7 @@ const SinglesBrowser = ({ currentUserId }) => {
             <div className="singles-browser">
                 <div className="error-state">
                     <p>{error}</p>
-                    <button onClick={fetchMatchingProfiles} className="retry-btn">
+                    <button onClick={() => window.location.reload()} className="retry-btn">
                         נסה שוב
                     </button>
                 </div>

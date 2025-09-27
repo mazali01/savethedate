@@ -26,7 +26,7 @@ const PrivacyToggle = ({ isPublic, onChange, disabled = false }) => {
                 )}
 
                 <span className="privacy-text">
-                    {isPublic ? 'ציבורי' : 'פרטי'}
+                    {isPublic ? 'לכולם' : 'אישי'}
                 </span>
             </div>
         </motion.label>

@@ -5,10 +5,9 @@ import {
     Typography,
     Alert
 } from '@mui/material';
-import { motion } from 'framer-motion';
 
 import PageTemplate from '../components/PageTemplate';
-import { useRsvpPageData } from '../hooks/useRsvpData';
+import { useRsvpPageData } from '../api';
 import { useRsvpActions } from '../hooks/useRsvpActions';
 import { useRsvpPageState, RSVP_STATES } from '../hooks/useRsvpPageState';
 import {

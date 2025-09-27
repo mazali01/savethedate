@@ -1,116 +1,90 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import { IconButton } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import DeleteIcon from '@mui/icons-material/Delete';
-import AddReactionIcon from '@mui/icons-material/AddReaction';
-import Picker from '@emoji-mart/react';
-import data from '@emoji-mart/data';
 import WhatsAppInput from '../components/WhatsAppInput';
-import PaymentGifts from '../components/PaymentGifts';
 import PrivacyToggle from '../components/PrivacyToggle';
 import Notification from '../components/Notification';
+import VirtualizedBlessingsList from '../components/VirtualizedBlessingsList';
+import EmojiPickerModal from '../components/EmojiPickerModal';
+import PaymentFooter from '../components/PaymentFooter';
 import {
-  uploadMediaFile,
-  validateMediaFile,
-  createPaymentLinks,
-  getCommonEmojis,
-  formatDate,
-  groupReactionsByEmoji,
-  createBlessing,
-  getPublicBlessings,
-  addReaction,
-  removeReaction,
-  upsertUser,
-  deleteBlessing
-} from '../services/giftService';
-import { getInvitedUserById } from '../services/rsvpService';
+  usePaginatedBlessings,
+  useInvitedUser,
+  useUploadMediaFile,
+  useCreateBlessing,
+  useAddReaction,
+  useRemoveReaction,
+  useDeleteBlessing,
+  useUpsertUser
+} from '../api';
 import './GiftsPage.css';
 
 const GiftsPage = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
   const [message, setMessage] = useState('');
   const [isPublic, setIsPublic] = useState(true);
   const [mediaPreview, setMediaPreview] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [blessings, setBlessings] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [notification, setNotification] = useState(null);
-  const [error, setError] = useState(null);
   const [emojiPickerAnchor, setEmojiPickerAnchor] = useState(null);
   const [selectedBlessingForEmoji, setSelectedBlessingForEmoji] = useState(null);
 
-  const paymentLinks = useMemo(() => createPaymentLinks(), []);
-  const commonEmojis = useMemo(() => getCommonEmojis(), []);
+  // React Query hooks
+  const { data: user } = useInvitedUser(userId);
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    error: blessingsError
+  } = usePaginatedBlessings();
 
-  // Load user data
-  useEffect(() => {
-    const loadUserData = async () => {
-      try {
-        const userData = await getInvitedUserById(userId);
-        if (userData) {
-          setUser({
-            uid: userId,
-            displayName: userData.name || userData.invitedName,
-            email: userData.email
-          });
-        }
-      } catch (error) {
-        console.error('Error loading user data:', error);
-      }
-    };
+  const uploadMediaMutation = useUploadMediaFile();
+  const createBlessingMutation = useCreateBlessing();
+  const addReactionMutation = useAddReaction();
+  const removeReactionMutation = useRemoveReaction();
+  const deleteBlessingMutation = useDeleteBlessing();
+  const upsertUserMutation = useUpsertUser();
 
-    if (userId) {
-      loadUserData();
-    }
-  }, [userId]);
+  const blessings = useMemo(() => {
+    if (!data?.pages) return [];
+    const flatBlessings = data.pages.flatMap(page => page.blessings);
 
-  // Load blessings
-  const loadBlessings = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const blessingsData = await getPublicBlessings();
-
-      // Add random rotation for masonry effect
-      const blessingsWithRotation = blessingsData.map(blessing => ({
-        ...blessing,
-        rotation: (Math.random() - 0.5) * 6 // Random rotation between -3 and 3 degrees
-      }));
-
-      setBlessings(blessingsWithRotation);
-    } catch (error) {
-      console.error('Error loading blessings:', error);
-      setError('שגיאה בטעינת הברכות');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadBlessings();
-  }, [loadBlessings]);
+    console.log('Blessings loaded:', flatBlessings.length);
+    return flatBlessings;
+  }, [data]);
 
   // Show notification
-  const showNotification = useCallback((message, type = 'success') => {
+  const showNotification = (message, type = 'success') => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 3000);
-  }, []);
+  };
 
   // Handle media selection from WhatsApp input
-  const handleMediaSelect = useCallback((mediaData) => {
+  const handleMediaSelect = (mediaData) => {
     setMediaPreview(mediaData);
-  }, []);
+  };
 
   // Remove media file
-  const removeMedia = useCallback(() => {
+  const removeMedia = () => {
     if (mediaPreview) {
-      URL.revokeObjectURL(mediaPreview.url);
+      // Handle both single media and multiple media
+      if (Array.isArray(mediaPreview)) {
+        mediaPreview.forEach(media => {
+          if (media.url) {
+            URL.revokeObjectURL(media.url);
+          }
+        });
+      } else {
+        if (mediaPreview.url) {
+          URL.revokeObjectURL(mediaPreview.url);
+        }
+      }
     }
     setMediaPreview(null);
-  }, [mediaPreview]);
+  };
 
   // Handle blessing submission
   const handleSubmit = async (e) => {
@@ -121,54 +95,69 @@ const GiftsPage = () => {
       return;
     }
 
-    if (!message.trim()) {
-      showNotification('אנא כתבו הודעה', 'error');
-      return;
-    }
-
     try {
-      setIsSubmitting(true);
-
       // Ensure user exists in database
-      await upsertUser(user.uid, {
-        username: user.displayName || user.email?.split('@')[0] || 'אורח'
+      await upsertUserMutation.mutateAsync({
+        userId: user.id,
+        userData: {
+          username: user.name || user.invitedName || 'אורח'
+        }
       });
 
-      let mediaUrl = null;
-      let mediaType = null;
+      let mediaUrls = [];
+      let mediaTypes = [];
 
       // Upload media if present
-      if (mediaPreview?.file) {
-        const uploadResult = await uploadMediaFile(mediaPreview.file);
-        mediaUrl = uploadResult.url;
-        mediaType = uploadResult.type;
+      if (mediaPreview) {
+        // Handle both single media and multiple media
+        const mediaArray = Array.isArray(mediaPreview) ? mediaPreview : [mediaPreview];
+
+        for (const media of mediaArray) {
+          if (media?.file) {
+            const uploadResult = await uploadMediaMutation.mutateAsync({
+              file: media.file,
+              folder: 'blessings'
+            });
+            mediaUrls.push(uploadResult.url);
+            mediaTypes.push(uploadResult.type);
+          }
+        }
       }
 
-      // Create blessing
-      await createBlessing({
-        userId: user.uid,
-        username: user.displayName || user.email?.split('@')[0] || 'אורח',
+      // Create blessing with multiple media support
+      const blessingData = {
+        userId: user.id,
+        username: user.name || user.invitedName || 'אורח',
         message: message.trim(),
-        isPublic,
-        mediaUrl,
-        mediaType
-      });
+        isPublic
+      };
+
+      // Add media data - support both single and multiple media for backward compatibility
+      if (mediaUrls.length > 0) {
+        if (mediaUrls.length === 1) {
+          // Single media - keep backward compatibility
+          blessingData.mediaUrl = mediaUrls[0];
+          blessingData.mediaType = mediaTypes[0];
+        } else {
+          // Multiple media - use arrays
+          blessingData.mediaUrls = mediaUrls;
+          blessingData.mediaTypes = mediaTypes;
+        }
+        // Always include arrays for future compatibility
+        blessingData.mediaUrls = mediaUrls;
+        blessingData.mediaTypes = mediaTypes;
+      }
+
+      await createBlessingMutation.mutateAsync(blessingData);
 
       // Reset form
       setMessage('');
       setIsPublic(true);
       removeMedia();
 
-      showNotification('הברכה נשלחה בהצלחה! 🎉');
-
-      // Reload blessings
-      loadBlessings();
-
     } catch (error) {
       console.error('Error submitting blessing:', error);
       showNotification('שגיאה בשליחת הברכה', 'error');
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -182,18 +171,39 @@ const GiftsPage = () => {
     try {
       // Check if user already reacted with this emoji
       const blessing = blessings.find(b => b.id === blessingId);
-      const userReaction = blessing?.reactions?.find(r => r.userId === user.uid);
+      const userReaction = blessing?.reactions?.find(r => r.userId === user.id);
 
-      if (userReaction && userReaction.emoji === emoji) {
-        // Remove reaction
-        await removeReaction(blessingId, user.uid);
+      if (userReaction && userReaction.emojis && userReaction.emojis.includes(emoji)) {
+        // Remove this specific emoji from user's reactions
+        const updatedEmojis = userReaction.emojis.filter(e => e !== emoji);
+
+        if (updatedEmojis.length === 0) {
+          // Remove entire reaction if no emojis left
+          await removeReactionMutation.mutateAsync({
+            blessingId,
+            userId: user.id
+          });
+        } else {
+          // Update reaction with remaining emojis
+          await addReactionMutation.mutateAsync({
+            blessingId,
+            userId: user.id,
+            username: user.name || user.invitedName || 'אורח',
+            emojis: updatedEmojis
+          });
+        }
       } else {
-        // Add or update reaction
-        await addReaction(blessingId, user.uid, user.displayName || 'אורח', emoji);
-      }
+        // Add emoji to existing emojis or create new reaction
+        const existingEmojis = userReaction?.emojis || [];
+        const updatedEmojis = [...existingEmojis, emoji];
 
-      // Reload blessings to show updated reactions
-      loadBlessings();
+        await addReactionMutation.mutateAsync({
+          blessingId,
+          userId: user.id,
+          username: user.name || user.invitedName || 'אורח',
+          emojis: updatedEmojis
+        });
+      }
 
     } catch (error) {
       console.error('Error handling reaction:', error);
@@ -216,11 +226,12 @@ const GiftsPage = () => {
     }
 
     try {
-      await deleteBlessing(blessingId, user.uid);
-      showNotification('הברכה נמחקה בהצלחה');
+      await deleteBlessingMutation.mutateAsync({
+        blessingId,
+        userId: user.id
+      });
 
-      // Reload blessings to reflect the deletion
-      loadBlessings();
+      showNotification('הברכה נמחקה בהצלחה');
     } catch (error) {
       console.error('Error deleting blessing:', error);
       showNotification(error.message || 'שגיאה במחיקת הברכה', 'error');
@@ -239,20 +250,10 @@ const GiftsPage = () => {
     setSelectedBlessingForEmoji(null);
   };
 
-  // Handle emoji selection from picker
-  const handleEmojiSelect = (emoji) => {
-    if (selectedBlessingForEmoji) {
-      // emoji-mart returns an emoji object, we need the native emoji
-      const emojiChar = emoji.native || emoji.emoji || emoji;
-      handleReaction(selectedBlessingForEmoji, emojiChar);
-    }
-    handleEmojiPickerClose();
-  };
-
   // Get user's reaction for a blessing
   const getUserReaction = (blessing) => {
     if (!user) return null;
-    return blessing.reactions?.find(r => r.userId === user.uid);
+    return blessing.reactions?.find(r => r.userId === user.id);
   };
 
   // Handle back navigation
@@ -263,6 +264,12 @@ const GiftsPage = () => {
       navigate('/');
     }
   };
+
+  // Loading state check
+  const isSubmitting = createBlessingMutation.isPending || uploadMediaMutation.isPending;
+  const isLoadingMore = isFetchingNextPage;
+  const hasMore = hasNextPage;
+  const error = blessingsError?.message;
 
   return (
     <div className="gifts-container">
@@ -323,7 +330,10 @@ const GiftsPage = () => {
           )}
 
           {isLoading ? (
-            <div className="loading-spinner">טוען ברכות...</div>
+            <div className="empty-state">
+              <div className="empty-state-icon">⏳</div>
+              <div className="empty-state-text">טוען ברכות...</div>
+            </div>
           ) : blessings.length === 0 ? (
             <div className="empty-state">
               <div className="empty-state-icon">💌</div>
@@ -333,229 +343,34 @@ const GiftsPage = () => {
               </div>
             </div>
           ) : (
-            <div className="blessings-masonry">
-              <AnimatePresence>
-                {blessings.map((blessing) => {
-                  const userReaction = getUserReaction(blessing);
-                  const groupedReactions = groupReactionsByEmoji(blessing.reactions || []);
-
-                  return (
-                    <motion.div
-                      key={blessing.id}
-                      className="blessing-card"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.4 }}
-                      layout
-                    >
-                      <div className="blessing-header">
-                        <div className="blessing-avatar">
-                          {blessing.username.charAt(0).toUpperCase()}
-                        </div>
-                        <div className="blessing-user-info">
-                          <div className="blessing-username">
-                            {blessing.username}
-                          </div>
-                          <div className="blessing-date">
-                            {formatDate(blessing.createdAt)}
-                          </div>
-                        </div>
-                        {/* Delete button - only show for user's own blessings */}
-                        {user && blessing.userId === user.uid && (
-                          <IconButton
-                            onClick={() => handleDeleteBlessing(blessing.id)}
-                            size="small"
-                            className="delete-blessing-button"
-                            sx={{
-                              marginRight: 'auto',
-                              color: '#dc3545',
-                              opacity: 0.7,
-                              '&:hover': {
-                                opacity: 1,
-                                backgroundColor: 'rgba(220, 53, 69, 0.1)',
-                              },
-                            }}
-                            title="מחק ברכה"
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        )}
-                      </div>
-
-                      {blessing.mediaUrl && (
-                        <div className="blessing-media">
-                          {blessing.mediaType === 'image' ? (
-                            <img
-                              src={blessing.mediaUrl}
-                              alt="Blessing media"
-                              loading="lazy"
-                            />
-                          ) : blessing.mediaType === 'audio' ? (
-                            <div className="audio-message">
-                              <audio
-                                src={blessing.mediaUrl}
-                                controls
-                                preload="metadata"
-                              />
-                              <span className="audio-label">🎵 Voice Message</span>
-                            </div>
-                          ) : (
-                            <video
-                              src={blessing.mediaUrl}
-                              controls
-                              preload="metadata"
-                            />
-                          )}
-                        </div>
-                      )}
-
-                      <div className="blessing-message">
-                        {blessing.message}
-                      </div>
-
-                      <div className="blessing-reactions">
-                        <div className="reaction-buttons">
-                          {commonEmojis.slice(0, 5).map((emoji) => (
-                            <button
-                              key={emoji}
-                              onClick={() => handleReaction(blessing.id, emoji)}
-                              className={`reaction-button ${userReaction?.emoji === emoji ? 'active' : ''
-                                }`}
-                              title={`הוסף ${emoji}`}
-                            >
-                              {emoji}
-                              {groupedReactions[emoji] && (
-                                <span className="reaction-count">
-                                  {groupedReactions[emoji].length}
-                                </span>
-                              )}
-                            </button>
-                          ))}
-                          {/* Emoji picker button */}
-                          <button
-                            onClick={(e) => handleEmojiPickerOpen(e, blessing.id)}
-                            className="reaction-button emoji-picker-button"
-                            title="בחר אימוג'י נוסף"
-                          >
-                            <AddReactionIcon fontSize="small" />
-                          </button>
-                        </div>
-
-                        {Object.keys(groupedReactions).length > 0 && (
-                          <div className="existing-reactions">
-                            {Object.entries(groupedReactions).map(([emoji, users]) => (
-                              <div key={emoji} className="existing-reaction">
-                                {emoji} <span className="count">{users.length}</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </AnimatePresence>
-            </div>
+            <VirtualizedBlessingsList
+              items={blessings || []}
+              loadMore={fetchNextPage || (() => Promise.resolve())}
+              hasMore={hasMore || false}
+              isLoading={isLoadingMore || false}
+              user={user || null}
+              onReaction={handleReaction || (() => { })}
+              onDeleteBlessing={handleDeleteBlessing || (() => { })}
+              onEmojiPickerOpen={handleEmojiPickerOpen || (() => { })}
+              getUserReaction={getUserReaction || (() => null)}
+            />
           )}
         </div>
       </div>
 
       {/* Fixed Footer with Payment Options */}
-      <div className="fixed-footer">
-        <div className="footer-content">
-          <span className="footer-text">רוצים להשאיר מתנה?</span>
-          <div className="payment-buttons">
-            <a
-              href={paymentLinks.bit.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="payment-button-footer bit-button"
-              title="תשלום דרך Bit"
-            >
-              <img
-                src="https://upload.wikimedia.org/wikipedia/he/d/d6/Bit_logo.svg"
-                alt="Bit"
-                className="payment-logo"
-              />
-            </a>
-            <a
-              href={paymentLinks.paybox.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="payment-button-footer paybox-button"
-              title="תשלום דרך PayBox"
-            >
-              <img
-                src="https://upload.wikimedia.org/wikipedia/he/e/ef/Pay-box-logo%403x.webp"
-                alt="PayBox"
-                className="payment-logo"
-              />
-            </a>
-          </div>
-        </div>
-      </div>
+      <PaymentFooter />
 
       {/* Emoji Picker Modal */}
-      <AnimatePresence>
-        {emojiPickerAnchor && (
-          <motion.div
-            className="emoji-picker-overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            onClick={handleEmojiPickerClose}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: 'rgba(0, 0, 0, 0.5)',
-              zIndex: 9999,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '20px'
-            }}
-          >
-            <motion.div
-              className="emoji-picker-container"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              onClick={(e) => e.stopPropagation()}
-              style={{
-                backgroundColor: 'white',
-                borderRadius: '15px',
-                boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-                overflow: 'hidden',
-                maxWidth: '320px',
-                maxHeight: '400px',
-                width: '100%'
-              }}
-            >
-              <Picker
-                data={data}
-                onEmojiSelect={handleEmojiSelect}
-                theme="light"
-                previewPosition="none"
-                searchPosition="top"
-                set="native"
-                showPreview={false}
-                showSkinTones={false}
-                emojiButtonSize={32}
-                emojiSize={24}
-                perLine={8}
-                maxFrequentRows={2}
-                categories={['frequent', 'people', 'nature', 'foods', 'activity', 'places', 'objects', 'symbols']}
-              />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <EmojiPickerModal
+        isOpen={!!emojiPickerAnchor}
+        onClose={handleEmojiPickerClose}
+        onEmojiSelect={(emoji) => {
+          if (selectedBlessingForEmoji) {
+            handleReaction(selectedBlessingForEmoji, emoji);
+          }
+        }}
+      />
 
       {/* Notification */}
       <Notification

@@ -1,27 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { subscribeToCarpoolOffers } from '../../services/carpoolService.js';
+import { useCarpoolOffers } from '../../api';
 import { filterCities } from '../../data/cities.js';
 import './CarpoolBrowser.css';
 
 const CarpoolBrowser = ({ userId }) => {
-    const [offers, setOffers] = useState([]);
     const [filteredOffers, setFilteredOffers] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [searchFilters, setSearchFilters] = useState({
         fromCity: '',
         minSeats: ''
     });
     const [fromCitySuggestions, setFromCitySuggestions] = useState([]);
 
-    useEffect(() => {
-        const unsubscribe = subscribeToCarpoolOffers((offersData) => {
-            setOffers(offersData);
-            setFilteredOffers(offersData);
-            setLoading(false);
-        });
+    // Use React Query hook to fetch offers
+    const { data: offers = [], isLoading: loading } = useCarpoolOffers();
 
-        return () => unsubscribe();
-    }, []);
+    useEffect(() => {
+        setFilteredOffers(offers);
+    }, [offers]);
 
     // Filter offers based on search criteria
     useEffect(() => {

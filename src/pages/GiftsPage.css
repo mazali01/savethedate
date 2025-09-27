@@ -23,17 +23,18 @@
 .header-content {
   max-width: 800px;
   margin: 0 auto;
-  padding-top: 0.5em; /* Space for back button */
+  padding-top: 0.5em;
+  /* Space for back button */
 }
 
-  .header-input-section {
-    margin-top: 16px;
-  }
-  
-  .input-with-privacy {
-    gap: 8px;
-    align-items: center;
-  }
+.header-input-section {
+  margin-top: 16px;
+}
+
+.input-with-privacy {
+  gap: 8px;
+  align-items: center;
+}
 
 .input-with-privacy {
   display: flex;
@@ -70,31 +71,40 @@
 
 .condensed-textarea {
   width: 100%;
-  padding: 12px 80px 12px 16px; /* WhatsApp-like padding with space for buttons */
+  padding: 12px 80px 12px 16px;
+  /* WhatsApp-like padding with space for buttons */
   border: 1px solid #e0e0e0;
-  border-radius: 24px; /* More rounded like WhatsApp */
+  border-radius: 24px;
+  /* More rounded like WhatsApp */
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  font-size: 14px; /* WhatsApp font size */
+  font-size: 14px;
+  /* WhatsApp font size */
   line-height: 1.4;
-  resize: none; /* WhatsApp doesn't allow manual resize */
+  resize: none;
+  /* WhatsApp doesn't allow manual resize */
   direction: rtl;
   background: #ffffff;
   transition: all 0.15s ease;
   box-sizing: border-box;
-  min-height: 44px; /* WhatsApp-like height */
-  max-height: 120px; /* Limit height like WhatsApp */
+  min-height: 44px;
+  /* WhatsApp-like height */
+  max-height: 120px;
+  /* Limit height like WhatsApp */
   overflow-y: auto;
-  color: #111b21; /* WhatsApp text color */
+  color: #111b21;
+  /* WhatsApp text color */
 }
 
 .condensed-textarea::placeholder {
-  color: #8696a0; /* WhatsApp placeholder color */
+  color: #8696a0;
+  /* WhatsApp placeholder color */
   opacity: 1;
 }
 
 .condensed-textarea:focus {
   outline: none;
-  border-color: #00a884; /* WhatsApp green */
+  border-color: #00a884;
+  /* WhatsApp green */
   box-shadow: 0 0 0 1px rgba(0, 168, 132, 0.3);
   background: #ffffff;
 }
@@ -115,7 +125,8 @@
   width: 32px !important;
   height: 32px !important;
   min-width: 32px !important;
-  color: #8696a0 !important; /* WhatsApp gray for inactive state */
+  color: #8696a0 !important;
+  /* WhatsApp gray for inactive state */
   transition: all 0.15s ease !important;
 }
 
@@ -125,7 +136,8 @@
 }
 
 .send-button-inside:not(:disabled) {
-  color: #00a884 !important; /* WhatsApp green for send button */
+  color: #00a884 !important;
+  /* WhatsApp green for send button */
 }
 
 .send-button-inside:not(:disabled):hover {
@@ -150,15 +162,18 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 13px; /* WhatsApp-like smaller font */
-  color: #667781; /* WhatsApp secondary text color */
+  font-size: 13px;
+  /* WhatsApp-like smaller font */
+  color: #667781;
+  /* WhatsApp secondary text color */
   cursor: pointer;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .privacy-checkbox input {
   margin: 0;
-  accent-color: #00a884; /* WhatsApp green for checkbox */
+  accent-color: #00a884;
+  /* WhatsApp green for checkbox */
 }
 
 .media-preview-small {
@@ -197,15 +212,21 @@
 /* Scrollable Body */
 .scrollable-body {
   flex: 1;
+  min-height: 0;
+  /* Critical for AutoSizer to work properly */
   padding: 1em;
-  padding-bottom: 8em; /* Adjusted for payment footer */
-  overflow-y: auto;
+  /* Adjusted for payment footer */
+  overflow: hidden;
+  /* Let the virtual list handle scrolling */
   -webkit-overflow-scrolling: touch;
 }
 
 .feed-content {
   max-width: 1200px;
   margin: 0 auto;
+  height: 100%;
+  min-height: 0;
+  /* Critical for AutoSizer child */
 }
 
 /* Masonry Layout for Blessings */
@@ -243,7 +264,6 @@
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  transform: rotate(var(--rotation, 0deg));
   transition: all 0.3s ease;
   break-inside: avoid;
 }
@@ -349,7 +369,8 @@
   color: #2d3436;
   line-height: 1.6;
   word-break: break-word;
-  white-space: pre-wrap; /* Preserve line breaks and spaces */
+  white-space: pre-wrap;
+  /* Preserve line breaks and spaces */
 }
 
 .blessing-reactions {
@@ -361,21 +382,20 @@
 .reaction-buttons {
   display: flex;
   gap: 8px;
-  flex-wrap: wrap;
   margin-bottom: 10px;
+  align-items: center;
 }
 
 .reaction-button {
   background: rgba(255, 255, 255, 0.8);
   border: 1px solid #ddd;
   border-radius: 20px;
-  padding: 5px 10px;
+  padding: 4px 8px;
   cursor: pointer;
   display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.5rem;
+  font-size: 1rem;
   transition: all 0.2s ease;
+  position: relative;
 }
 
 .reaction-button:hover {
@@ -389,22 +409,82 @@
   border-color: #74b9ff;
 }
 
-.reaction-count {
-  font-size: 0.8rem;
-  font-weight: 500;
+/* Enhanced tooltips for reaction buttons */
+.reaction-button[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 1000;
+  margin-bottom: 5px;
+  max-width: 200px;
+  word-wrap: break-word;
+  text-align: center;
+}
+
+.reaction-button[title]:hover::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: rgba(0, 0, 0, 0.8);
+  margin-bottom: 1px;
+  z-index: 1000;
 }
 
 .existing-reactions {
   display: flex;
-  gap: 8px;
   flex-wrap: wrap;
+  gap: 0.5em;
 }
 
 .existing-reaction {
-  background: rgba(116, 185, 255, 0.1);
-  padding: 3px 8px;
+  position: relative;
+  cursor: pointer;
+  border: 1px solid #ddd;
   border-radius: 12px;
-  font-size: 0.8rem;
+  padding: 4px 8px;
+  transition: all 0.2s ease;
+}
+
+.existing-reaction[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 1000;
+  margin-bottom: 5px;
+  max-width: 200px;
+  word-wrap: break-word;
+  text-align: center;
+}
+
+.existing-reaction[title]:hover::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: rgba(0, 0, 0, 0.8);
+  margin-bottom: 1px;
+  z-index: 1000;
 }
 
 /* Loading and Empty States */
@@ -540,27 +620,39 @@
   .fixed-header {
     padding: 10px 15px;
   }
-  
+
   .header-title {
     font-size: 1.3rem;
   }
-  
+
   .header-input-section {
     gap: 10px;
   }
-  
+
   .scrollable-body {
     padding: 0.5em;
-    padding-bottom: 10em; /* Space for payment footer */
+    /* Space for payment footer */
   }
-  
+
   .fixed-footer {
     padding: 12px 0;
   }
-  
+
   .footer-content {
     padding: 0 12px;
   }
+}
+
+/* Hide scrollbars for virtual feed */
+.virtual-feed::-webkit-scrollbar {
+  display: none;
+}
+
+.virtual-feed {
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
 }
 
 /* Remove old styles that are no longer needed */
@@ -588,7 +680,7 @@
   font-size: 2.5rem;
   color: #2d3436;
   margin-bottom: 10px;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .gifts-subtitle {
@@ -906,7 +998,6 @@
   border-radius: 15px;
   padding: 20px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-  transform: rotate(var(--rotation, 0deg));
   transition: all 0.3s ease;
   position: relative;
   border: 3px solid transparent;
@@ -989,7 +1080,8 @@
   line-height: 1.6;
   margin-bottom: 15px;
   font-size: 1rem;
-  white-space: pre-wrap; /* Preserve line breaks and spaces */
+  white-space: pre-wrap;
+  /* Preserve line breaks and spaces */
 }
 
 /* Reactions Section */
@@ -1000,237 +1092,148 @@
 
 .reaction-buttons {
   display: flex;
-  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 10px;
+  align-items: center;
 }
 
-.reaction-button {
-  background: none;
-  border: 1px solid #ddd;
-  border-radius: 20px;
-  padding: 5px 12px;
+/* Common emojis horizontal scroll container */
+.common-emojis-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #ccc transparent;
+  flex: 1;
+  padding: 4px 0;
+  max-width: calc(100% - 60px);
+  /* Leave space for emoji picker button */
+}
+
+.common-emojis-scroll::-webkit-scrollbar {
+  height: 4px;
+}
+
+.common-emojis-scroll::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 2px;
+}
+
+.common-emojis-scroll::-webkit-scrollbar-thumb {
+  background: rgba(116, 185, 255, 0.5);
+  border-radius: 2px;
+}
+
+.common-emojis-scroll::-webkit-scrollbar-thumb:hover {
+  background: #74b9ff;
+}
+
+/* Emoji picker button positioned on the right */
+.emoji-picker-button {
+  flex-shrink: 0;
+  border-radius: 50% !important;
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px;
+  padding: 6px !important;
+  background: rgba(116, 185, 255, 0.1) !important;
+  border-color: #74b9ff !important;
+}
+
+.emoji-picker-button:hover {
+  background: #74b9ff !important;
+  color: white !important;
+}
+
+/* User reactions display */
+.user-reactions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  background: rgba(116, 185, 255, 0.1);
+  border-radius: 15px;
+  border: 1px solid rgba(116, 185, 255, 0.3);
+}
+
+.user-reactions-label {
+  font-size: 0.75rem;
+  color: #555;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.user-emojis {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.user-emoji {
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.user-emoji:hover {
+  background: rgba(116, 185, 255, 0.2);
+  transform: scale(1.1);
+}
+
+/* Multiple media display in blessing cards */
+.multiple-media-display {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.media-item-display {
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f8f9fa;
+}
+
+.media-item-display img,
+.media-item-display video {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.media-item-display .audio-message {
+  padding: 10px;
+  background: #e7ffdb;
+  border-radius: 8px;
+}
+
+.media-item-display .audio-message audio {
+  width: 100%;
+}
+
+/* For multiple media, make images/videos in a grid when there are 2+ items */
+@media (min-width: 768px) {
+  .multiple-media-display {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+  }
+
+  /* When there are exactly 2 items, make them equal width */
+  .multiple-media-display:has(> .media-item-display:nth-child(2):last-child) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Clickable reaction styling */
+.clickable-reaction {
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 5px;
 }
 
-.reaction-button:hover {
-  background: #f8f9fa;
-  border-color: #6c5ce7;
-}
-
-.reaction-button.active {
-  background: #6c5ce7;
-  border-color: #6c5ce7;
-  color: white;
-}
-
-.reaction-count {
-  font-size: 0.9rem;
-  font-weight: bold;
-}
-
-.existing-reactions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.existing-reaction {
-  background: #f8f9fa;
-  border: 1px solid #ddd;
-  border-radius: 15px;
-  padding: 4px 8px;
-  font-size: 0.9rem;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.existing-reaction .count {
-  font-weight: bold;
-  color: #6c5ce7;
-}
-
-/* Loading States */
-.loading-spinner {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100px;
-  font-size: 1.1rem;
-  color: #636e72;
-}
-
-.loading-spinner::after {
-  content: '';
-  width: 20px;
-  height: 20px;
-  border: 2px solid #6c5ce7;
-  border-top: 2px solid transparent;
-  border-radius: 50%;
-  margin-right: 10px;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Error States */
-.error-message {
-  background: #ffe0e0;
-  color: #d63031;
-  padding: 15px;
-  border-radius: 10px;
-  margin-bottom: 20px;
-  text-align: center;
-  border: 1px solid #fab1a0;
-}
-
-/* Success States */
-.success-message {
-  background: #e8f5e8;
-  color: #00b894;
-  padding: 15px;
-  border-radius: 10px;
-  margin-bottom: 20px;
-  text-align: center;
-  border: 1px solid #55efc4;
-}
-
-/* Empty State */
-.empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  color: #636e72;
-}
-
-.empty-state-icon {
-  font-size: 4rem;
-  margin-bottom: 20px;
-  opacity: 0.5;
-}
-
-.empty-state-text {
-  font-size: 1.2rem;
-  margin-bottom: 10px;
-}
-
-.empty-state-subtext {
-  font-size: 1rem;
-  opacity: 0.7;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .gifts-title {
-    font-size: 2rem;
-  }
-  
-  .payment-options {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .payment-option {
-    width: 100%;
-    max-width: 300px;
-  }
-  
-  .blessing-form-section,
-  .payment-section {
-    padding: 20px;
-  }
-  
-  .blessings-masonry {
-    column-count: 1 !important;
-  }
-}
-
-/* Animation for new cards */
-.blessing-card.new-card {
-  animation: slideInUp 0.6s ease-out;
-}
-
-@keyframes slideInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px) rotate(var(--rotation, 0deg));
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) rotate(var(--rotation, 0deg));
-  }
-}
-
-/* Notification styles */
-.notification {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: white;
-  padding: 15px 20px;
-  border-radius: 10px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
-  animation: slideInRight 0.3s ease-out;
-  max-width: 300px;
-}
-
-.notification.success {
-  border-left: 4px solid #00b894;
-}
-
-.notification.error {
-  border-left: 4px solid #d63031;
-}
-
-@keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(100%);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-/* Custom scrollbar */
-.gifts-container::-webkit-scrollbar {
-  width: 8px;
-}
-
-.gifts-container::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.gifts-container::-webkit-scrollbar-thumb {
-  background: rgba(108, 92, 231, 0.3);
-  border-radius: 4px;
-}
-
-.gifts-container::-webkit-scrollbar-thumb:hover {
-  background: rgba(108, 92, 231, 0.5);
-}
-
-/* Emoji picker button in reaction buttons */
-.reaction-button.emoji-picker-button {
-  background-color: #f8f9fa;
-  border: 1px dashed #b2bec3;
-  color: #636e72;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.reaction-button.emoji-picker-button:hover {
-  background-color: #e9ecef;
-  border-color: #74b9ff;
-  color: #74b9ff;
+.clickable-reaction:hover {
+  background-color: rgba(116, 185, 255, 0.1);
+  transform: scale(1.05);
 }

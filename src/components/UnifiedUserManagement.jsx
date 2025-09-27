@@ -40,7 +40,19 @@ import {
     Sync as SyncIcon
 } from '@mui/icons-material';
 
-import { getInvitedUsers, createInvitedUser, updateInvitedUser, deleteInvitedUser } from '../services/invitedUsersService';
+import {
+    useInvitedUsers,
+    useCreateInvitedUser,
+    useUpdateInvitedUser,
+    useDeleteInvitedUser,
+    useAllRsvpResponses,
+    useSMSBalance,
+    useSMSConfiguration,
+    useTestSMS,
+    useSendBulkSMS,
+    useGenerateInvitationLink,
+    useCopyToClipboard
+} from '../api';
 import { hasCompletedRsvp, getAllRsvpResponses } from '../services/rsvpService';
 import {
     generateInvitationLink,

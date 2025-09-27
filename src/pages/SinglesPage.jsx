@@ -3,54 +3,41 @@ import { useParams } from 'react-router-dom';
 import PageTemplate from '../components/PageTemplate';
 import SinglesProfileForm from '../components/singles/SinglesProfileForm';
 import SinglesBrowser from '../components/singles/SinglesBrowser';
-import { getSinglesProfile, hasSinglesProfile } from '../services/singlesService';
-import { getInvitedUserById } from '../services/rsvpService';
+import { useInvitedUser, useSinglesProfile, useHasSinglesProfile } from '../api';
 import './SinglesPage.css';
 
 const SinglesPage = () => {
     const { userId } = useParams();
     const [currentView, setCurrentView] = useState('loading'); // 'loading', 'browse', 'create', 'edit'
-    const [userProfile, setUserProfile] = useState(null);
-    const [userData, setUserData] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState('');
+
+    // Use React Query hooks
+    const { data: userData, isLoading: userLoading } = useInvitedUser(userId);
+    const { data: userProfile, isLoading: profileLoading } = useSinglesProfile(userId);
+    const { data: hasProfile, isLoading: hasProfileLoading } = useHasSinglesProfile(userId);
+
+    const isLoading = userLoading || profileLoading || hasProfileLoading;
 
     useEffect(() => {
-        loadUserData();
-    }, [userId]);
-
-    const loadUserData = async () => {
-        try {
-            setIsLoading(true);
-
-            // Load user data from invited users
-            const invitedUser = await getInvitedUserById(userId);
-            if (!invitedUser) {
-                setError('משתמש לא נמצא');
-                return;
-            }
-            setUserData(invitedUser);
-
-            // Check if user has a singles profile
-            const existingProfile = await getSinglesProfile(userId);
-            setUserProfile(existingProfile);
-
-            // Set initial view based on whether user has profile
-            setCurrentView(existingProfile ? 'browse' : 'create');
-
-        } catch (err) {
-            console.error('Error loading user data:', err);
-            setError('שגיאה בטעינת נתוני המשתמש');
-        } finally {
-            setIsLoading(false);
+        if (isLoading) {
+            setCurrentView('loading');
+            return;
         }
-    };
+
+        if (!userData) {
+            setCurrentView('error');
+            return;
+        }
+
+        if (hasProfile && userProfile) {
+            setCurrentView('browse');
+        } else {
+            setCurrentView('create');
+        }
+    }, [isLoading, userData, userProfile, hasProfile]);
 
     const handleProfileSuccess = () => {
-        // Refresh user data and go to browse view
-        loadUserData().then(() => {
-            setCurrentView('browse');
-        });
+        // React Query will automatically update the cache
+        setCurrentView('browse');
     };
 
     const handleEditProfile = () => {
@@ -65,13 +52,9 @@ const SinglesPage = () => {
         setCurrentView('browse');
     };
 
-    const handleDeleteProfile = async () => {
-        // Reset user profile and reload data to ensure clean state
-        setUserProfile(null);
-        setCurrentView('loading');
-
-        // Reload user data to get fresh state
-        await loadUserData();
+    const handleDeleteProfile = () => {
+        // React Query will automatically update the cache
+        setCurrentView('create'); // Go to create view after deletion
     };
 
     if (isLoading) {
@@ -85,11 +68,11 @@ const SinglesPage = () => {
         );
     }
 
-    if (error) {
+    if (!userData) {
         return (
             <PageTemplate title="רווקים? בואו להכיר 💬">
                 <div className="singles-error">
-                    <p>{error}</p>
+                    <p>משתמש לא נמצא. יש לוודא שהקישור תקין.</p>
                 </div>
             </PageTemplate>
         );

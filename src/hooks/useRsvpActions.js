@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSubmitRsvp } from './useRsvpData';
+import { useSubmitRsvp } from '../api/rsvp';
 
 /**
  * Custom hook for RSVP action handlers

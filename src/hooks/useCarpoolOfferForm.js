@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
 import { useDebounce } from 'use-debounce';
 import { filterCities } from '../data/cities.js';
-import { getInvitedUserById } from '../services/rsvpService';
-import { createCarpoolOffer as createOfferService } from '../services/carpoolService.js';
+import { useInvitedUser, useCreateCarpoolOffer } from '../api';
 import { createCarpoolOffer } from '../models/carpoolModels.js';
 
 const initialFormData = {
@@ -28,42 +26,14 @@ export const useCarpoolOfferForm = (userId, onOfferCreated) => {
     const [debouncedReturnCity] = useDebounce(formData.returnCity, 300);
 
     // Load user data
-    const { data: userData, isLoading: userDataLoading } = useQuery({
-        queryKey: ['user', userId],
-        queryFn: () => getInvitedUserById(userId),
-        enabled: !!userId,
-        staleTime: 5 * 60 * 1000, // 5 minutes
-    });
+    const { data: userData, isLoading: userDataLoading } = useInvitedUser(userId);
 
     // City suggestions
     const fromCitySuggestions = debouncedFromCity.length >= 2 ? filterCities(debouncedFromCity) : [];
     const returnCitySuggestions = debouncedReturnCity.length >= 2 ? filterCities(debouncedReturnCity) : [];
 
     // Create offer mutation
-    const createOfferMutation = useMutation({
-        mutationFn: async (offerData) => {
-            const offer = createCarpoolOffer({
-                ...offerData,
-                userId: userId,
-                returnCity: offerData.returnCity || offerData.fromCity
-            });
-            const offerId = await createOfferService(offer);
-            return { ...offer, id: offerId };
-        },
-        onSuccess: (data) => {
-            onOfferCreated(data);
-            // Keep user data but reset form
-            setFormData({
-                ...initialFormData,
-                driverName: userData?.name || '',
-                phoneNumber: userData?.phoneNumber || ''
-            });
-            setErrors({});
-        },
-        onError: (error) => {
-            console.error('Error creating carpool offer:', error);
-        }
-    });
+    const createOfferMutation = useCreateCarpoolOffer();
 
     // Load user data into form
     useEffect(() => {
@@ -121,7 +91,27 @@ export const useCarpoolOfferForm = (userId, onOfferCreated) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (validateForm()) {
-            createOfferMutation.mutate(formData);
+            const offer = createCarpoolOffer({
+                ...formData,
+                userId: userId,
+                returnCity: formData.returnCity || formData.fromCity
+            });
+
+            createOfferMutation.mutate(offer, {
+                onSuccess: (data) => {
+                    onOfferCreated?.(data);
+                    // Keep user data but reset form
+                    setFormData({
+                        ...initialFormData,
+                        driverName: userData?.name || '',
+                        phoneNumber: userData?.phoneNumber || ''
+                    });
+                    setErrors({});
+                },
+                onError: (error) => {
+                    console.error('Error creating carpool offer:', error);
+                }
+            });
         }
     };
 

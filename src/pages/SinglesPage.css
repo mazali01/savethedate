@@ -229,6 +229,7 @@
     from {
         opacity: 0;
     }
+
     to {
         opacity: 1;
     }
@@ -239,6 +240,7 @@
         opacity: 0;
         transform: translateY(-20px) scale(0.95);
     }
+
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -266,11 +268,6 @@
     margin-bottom: 1rem;
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
 .singles-error p {
     font-size: 1.1rem;
     color: #e74c3c;
@@ -281,27 +278,27 @@
     .singles-main {
         padding: 0.5rem;
     }
-    
+
     .profile-status {
         padding: 1.5rem;
         margin-bottom: 1.5rem;
     }
-    
+
     .profile-exists,
     .no-profile {
         flex-direction: column;
         text-align: center;
         gap: 1rem;
     }
-    
+
     .profile-card-mini {
         justify-content: center;
     }
-    
+
     .no-profile-message {
         text-align: center;
     }
-    
+
     .edit-profile-btn,
     .create-profile-btn {
         width: 100%;
@@ -340,22 +337,22 @@
         margin: 0.5rem;
         border-radius: 10px;
     }
-    
+
     .profile-card-mini {
         flex-direction: column;
         text-align: center;
         gap: 0.75rem;
     }
-    
+
     .profile-card-mini img {
         width: 50px;
         height: 50px;
     }
-    
+
     .no-profile-message h4 {
         font-size: 1.1rem;
     }
-    
+
     .no-profile-message p {
         font-size: 0.9rem;
     }

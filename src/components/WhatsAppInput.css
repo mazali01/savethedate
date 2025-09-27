@@ -74,6 +74,7 @@
 
 .input-wrapper {
   display: flex;
+  padding: 0 0.5em;
   background: #ffffff;
   border-radius: 24px;
   border: 1px solid #e1e7ea;
@@ -158,6 +159,7 @@
 
 .send-button {
   color: #00a884 !important;
+  background-color: transparent !important;
 }
 
 .send-button:not(:disabled):hover {
@@ -181,7 +183,7 @@
 
 /* Icon styling */
 .icon {
-    transform: scaleX(-1);
+  transform: scaleX(-1);
   width: 20px;
   height: 20px;
 }
@@ -189,19 +191,20 @@
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .message-input {
-    font-size: 16px; /* Prevent zoom on iOS */
+    font-size: 16px;
+    /* Prevent zoom on iOS */
   }
-  
+
   .input-wrapper {
     min-height: 40px;
   }
-  
+
   .attach-button,
   .send-button,
   .voice-button {
     padding: 0px !important;
   }
-  
+
   .icon {
     width: 18px;
     height: 18px;
@@ -210,9 +213,12 @@
 
 /* Animation for drag state */
 @keyframes dragPulse {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 0 1px rgba(0, 168, 132, 0.3);
   }
+
   50% {
     box-shadow: 0 0 0 4px rgba(0, 168, 132, 0.2);
   }
@@ -220,4 +226,47 @@
 
 .input-wrapper.drag-active {
   animation: dragPulse 1.5s ease-in-out infinite;
+}
+
+/* Multiple media preview styles */
+.multiple-media-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 400px;
+}
+
+.media-item-preview {
+  position: relative;
+  flex: 0 0 auto;
+  max-width: 120px;
+}
+
+.media-item-preview img,
+.media-item-preview video {
+  width: 100%;
+  max-height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.media-item-preview .audio-preview {
+  width: 120px;
+  padding: 4px;
+}
+
+.media-item-preview .audio-preview audio {
+  width: 100%;
+  height: 24px;
+}
+
+.media-item-preview .remove-media-whatsapp {
+  top: -4px;
+  right: -4px;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

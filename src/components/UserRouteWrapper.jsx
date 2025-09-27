@@ -32,6 +32,7 @@ const UserRouteWrapper = ({ children }) => {
         return (
             <PageTemplate>
                 <Box
+                    width={'100%'}
                     display="flex"
                     justifyContent="center"
                     alignItems="center"
