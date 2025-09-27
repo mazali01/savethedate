@@ -131,10 +131,10 @@ const NavPage = () => {
                     }}
                 >
                     <Typography variant="body2" sx={{ color: '#2c2c2c', mb: 1 }}>
-                        🅿️ <strong>חניה:</strong> יש חנייה מול מיקום החתונה
+                        🅿️ <strong>חניה:</strong> יש חניון מול האולם
                     </Typography>
                     <Typography variant="body2" sx={{ color: '#555555', fontSize: '0.9rem' }}>
-                        ⚠️ <strong>חשוב:</strong> קחו איתכם את כרטיס החניה לחתימה
+                        ⚠️ <strong>חשוב:</strong> תביאו איתכם את כרטיס החניה לחתימה
                     </Typography>
                 </Paper>
             </Box>

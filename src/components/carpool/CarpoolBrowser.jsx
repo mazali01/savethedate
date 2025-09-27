@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { useCarpoolOffers } from '../../api';
+import React, { useState, useMemo } from 'react';
+import { useCarpoolOffers, useDeleteCarpoolOffer } from '../../api';
 import { filterCities } from '../../data/cities.js';
 import './CarpoolBrowser.css';
 
 const CarpoolBrowser = ({ userId }) => {
-    const [filteredOffers, setFilteredOffers] = useState([]);
     const [searchFilters, setSearchFilters] = useState({
         fromCity: '',
         minSeats: ''
@@ -14,23 +13,24 @@ const CarpoolBrowser = ({ userId }) => {
     // Use React Query hook to fetch offers
     const { data: offers = [], isLoading: loading } = useCarpoolOffers();
 
-    useEffect(() => {
-        setFilteredOffers(offers);
-    }, [offers]);
+    // Delete offer mutation
+    const deleteOfferMutation = useDeleteCarpoolOffer();
 
-    // Filter offers based on search criteria
-    useEffect(() => {
-        let filtered = offers.filter(offer => {
+    // Memoized filtered offers based on search criteria
+    const filteredOffers = useMemo(() => {
+        if (!offers || offers.length === 0) {
+            return [];
+        }
+
+        return offers.filter(offer => {
             const matchesFromCity = !searchFilters.fromCity ||
-                offer.fromCity.toLowerCase().includes(searchFilters.fromCity.toLowerCase());
+                (offer.fromCity && offer.fromCity.toLowerCase().includes(searchFilters.fromCity.toLowerCase()));
             const matchesMinSeats = !searchFilters.minSeats ||
-                offer.availableSeats >= parseInt(searchFilters.minSeats);
+                (offer.availableSeats && offer.availableSeats >= parseInt(searchFilters.minSeats));
 
             return matchesFromCity && matchesMinSeats;
         });
-
-        setFilteredOffers(filtered);
-    }, [offers, searchFilters]);
+    }, [offers, searchFilters.fromCity, searchFilters.minSeats]);
 
     const handleSearchChange = (field, value) => {
         setSearchFilters(prev => ({
@@ -67,6 +67,35 @@ const CarpoolBrowser = ({ userId }) => {
         const message = encodeURIComponent(`שלום ${offer.driverName}, אני מעוניין בטרמפ מ${offer.fromCity} לחתונה. האם יש עוד מקום פנוי?`);
         const whatsappUrl = `https://wa.me/972${offer.phoneNumber.replace(/^0/, '').replace(/\D/g, '')}?text=${message}`;
         window.open(whatsappUrl, '_blank');
+    };
+
+    const handlePhoneCall = (phoneNumber) => {
+        // Create tel: link to open phone dialer
+        const telLink = `tel:${phoneNumber.replace(/\D/g, '')}`;
+        window.location.href = telLink;
+    };
+
+    const handleDeleteOffer = async (offer) => {
+        // Check if offer has valid ID
+        if (!offer.id) {
+            console.error('Cannot delete offer: missing ID', offer);
+            alert('שגיאה: הצעה ללא מזהה, לא ניתן למחוק');
+            return;
+        }
+
+        const confirmDelete = window.confirm(
+            `האם אתה בטוח שברצונך למחוק את הצעת הטרמפ מ${offer.fromCity}?`
+        );
+
+        if (confirmDelete) {
+            try {
+                await deleteOfferMutation.mutateAsync(offer.id);
+                alert('ההצעה נמחקה בהצלחה');
+            } catch (error) {
+                console.error('Error deleting offer:', error);
+                alert('שגיאה במחיקת ההצעה, נסה שוב');
+            }
+        }
     };
 
     const formatDate = (date) => {
@@ -111,7 +140,7 @@ const CarpoolBrowser = ({ userId }) => {
                                 <div className="city-suggestions">
                                     {fromCitySuggestions.map((city, index) => (
                                         <div
-                                            key={index}
+                                            key={city || index}
                                             onClick={() => handleCitySelect(city, 'fromCity')}
                                             className="city-suggestion"
                                         >
@@ -196,8 +225,8 @@ const CarpoolBrowser = ({ userId }) => {
                 </div>
             ) : (
                 <div className="offers-grid">
-                    {filteredOffers.map(offer => (
-                        <div key={offer.id} className="offer-card">
+                    {filteredOffers.map((offer, index) => (
+                        <div key={offer.id || `offer-${index}`} className="offer-card">
                             <div className="offer-header">
                                 <div className="driver-info">
                                     {offer.photoUrl && (
@@ -216,16 +245,34 @@ const CarpoolBrowser = ({ userId }) => {
                                             </span>
                                         </div>
                                         <div className="phone-row">
-                                            <span className="phone-number">📞 {offer.phoneNumber}</span>
-                                            {offer.userId !== userId && (
-                                                <button
-                                                    onClick={() => handleContactDriver(offer)}
-                                                    className="whatsapp-icon-button"
-                                                    title="צור קשר בWhatsApp"
-                                                >
-                                                    💬
-                                                </button>
-                                            )}
+                                            <span
+                                                className="phone-number clickable-phone"
+                                                onClick={() => handlePhoneCall(offer.phoneNumber)}
+                                                title="לחץ להתקשר"
+                                            >
+                                                📞 {offer.phoneNumber}
+                                            </span>
+                                            <div className="action-buttons">
+                                                {offer.userId !== userId && (
+                                                    <button
+                                                        onClick={() => handleContactDriver(offer)}
+                                                        className="whatsapp-icon-button"
+                                                        title="צור קשר בWhatsApp"
+                                                    >
+                                                        💬
+                                                    </button>
+                                                )}
+                                                {offer.userId === userId && (
+                                                    <button
+                                                        onClick={() => handleDeleteOffer(offer)}
+                                                        className="delete-offer-button"
+                                                        title="מחק הצעה"
+                                                        disabled={deleteOfferMutation.isPending}
+                                                    >
+                                                        {deleteOfferMutation.isPending ? '⏳' : '🗑️'}
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -300,7 +347,7 @@ const CarpoolBrowser = ({ userId }) => {
                                         <h5>נוסעים רשומים:</h5>
                                         <ul>
                                             {offer.passengers.map((passenger, index) => (
-                                                <li key={index}>
+                                                <li key={`${passenger.name || 'passenger'}-${passenger.phoneNumber || index}`}>
                                                     {passenger.name} - {passenger.phoneNumber}
                                                 </li>
                                             ))}

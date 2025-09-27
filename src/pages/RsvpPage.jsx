@@ -10,6 +10,7 @@ import PageTemplate from '../components/PageTemplate';
 import { useRsvpPageData } from '../api';
 import { useRsvpActions } from '../hooks/useRsvpActions';
 import { useRsvpPageState, RSVP_STATES } from '../hooks/useRsvpPageState';
+import { motion } from 'framer-motion';
 import {
     LoadingState,
     InitialQuestion,

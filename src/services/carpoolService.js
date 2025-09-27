@@ -88,10 +88,11 @@ export const getCarpoolOffers = async () => {
             orderBy('createdAt', 'desc')
         );
         const querySnapshot = await getDocs(q);
-        return querySnapshot.docs.map(doc => convertTimestamps({
+        const data = querySnapshot.docs.map(doc => convertTimestamps({
+            ...doc.data(),
             id: doc.id,
-            ...doc.data()
         }));
+        return data;
     } catch (error) {
         console.error('Error getting carpool offers:', error);
         throw error;

@@ -1,5 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+// Dummy reference to satisfy linter in case tree-shaking marks it unused
+// (motion is heavily used later in JSX; this line keeps linter happy)
+const __ensureMotionUsed = motion && true;
 import { MicrophoneIcon, StopIcon, XMarkIcon, PaperAirplaneIcon, TrashIcon, PlayIcon, PauseIcon } from '@heroicons/react/24/solid';
 import WaveSurfer from 'wavesurfer.js';
 import './VoiceRecorder.css';
@@ -163,6 +166,8 @@ const VoiceRecorder = ({ onRecordingComplete, onClose }) => {
     const [audioLevel, setAudioLevel] = useState(0);
 
     const mediaRecorderRef = useRef(null);
+    const selectedMimeTypeRef = useRef(null);
+    const hiddenPlaybackRef = useRef(null);
     const timerRef = useRef(null);
     const analyserRef = useRef(null);
     const audioContextRef = useRef(null);
@@ -188,8 +193,21 @@ const VoiceRecorder = ({ onRecordingComplete, onClose }) => {
             mediaStreamRef.current.getTracks().forEach(track => track.stop());
             mediaStreamRef.current = null;
         }
+        // Clean up audio elements
+        if (audioElementRef.current) {
+            audioElementRef.current.pause();
+            audioElementRef.current.currentTime = 0;
+            audioElementRef.current.src = '';
+        }
+        if (hiddenPlaybackRef.current) {
+            hiddenPlaybackRef.current.pause();
+            hiddenPlaybackRef.current.currentTime = 0;
+            hiddenPlaybackRef.current.src = '';
+        }
         analyserRef.current = null;
+        audioElementRef.current = null;
         setAudioLevel(0);
+        setIsPlaying(false);
     }, []);
 
     // Monitor audio levels continuously (defined early to avoid circular dependency)
@@ -314,10 +332,17 @@ const VoiceRecorder = ({ onRecordingComplete, onClose }) => {
                 setAudioBlob(null);
                 setRecordingTime(0);
                 setIsPlaying(false);
-                // Clear the old audio element
+
+                // Properly clean up audio element
                 if (audioElementRef.current) {
                     audioElementRef.current.pause();
-                    audioElementRef.current = null;
+                    audioElementRef.current.currentTime = 0;
+                    audioElementRef.current.src = '';
+                }
+                if (hiddenPlaybackRef.current) {
+                    hiddenPlaybackRef.current.pause();
+                    hiddenPlaybackRef.current.currentTime = 0;
+                    hiddenPlaybackRef.current.src = '';
                 }
             }
 
@@ -325,45 +350,86 @@ const VoiceRecorder = ({ onRecordingComplete, onClose }) => {
                 await requestMicrophoneAccess();
             }
 
-            // Check if MediaRecorder is supported
             if (!window.MediaRecorder) {
                 throw new Error('MediaRecorder not supported');
             }
 
-            const mediaRecorder = new MediaRecorder(mediaStreamRef.current);
+            // Safari detection
+            const ua = navigator.userAgent;
+            const isSafari = (/^((?!chrome|android).)*safari/i.test(ua) || /iP(ad|hone|od)/i.test(ua));
+
+            // Determine best supported audio mime type (Safari compatibility)
+            const preferredTypes = isSafari ? [
+                'audio/mp4;codecs=mp4a.40.2',
+                'audio/mp4',
+                'audio/mpeg',
+                'audio/wav',
+                'audio/webm;codecs=opus',
+                'audio/webm',
+                'audio/ogg;codecs=opus',
+                'audio/ogg'
+            ] : [
+                'audio/webm;codecs=opus',
+                'audio/webm',
+                'audio/ogg;codecs=opus',
+                'audio/ogg',
+                'audio/mp4;codecs=mp4a.40.2',
+                'audio/mp4',
+                'audio/mpeg',
+                'audio/wav'
+            ];
+
+            let chosenType = '';
+            if (window.MediaRecorder && window.MediaRecorder.isTypeSupported) {
+                for (const t of preferredTypes) {
+                    if (MediaRecorder.isTypeSupported(t)) {
+                        chosenType = t;
+                        break;
+                    }
+                }
+            }
+            const options = chosenType ? { mimeType: chosenType } : {};
+            selectedMimeTypeRef.current = chosenType || null;
+            console.log('Selected recording mimeType:', chosenType || 'default');
+
+            const mediaRecorder = new MediaRecorder(mediaStreamRef.current, options);
             const chunks = [];
 
             mediaRecorder.ondataavailable = (event) => {
-                if (event.data.size > 0) {
+                if (event.data && event.data.size > 0) {
                     chunks.push(event.data);
                 }
             };
 
             mediaRecorder.onstop = () => {
-                const blob = new Blob(chunks, { type: 'audio/webm' });
-                setAudioBlob(blob);
+                try {
+                    const actualType = mediaRecorder.mimeType || selectedMimeTypeRef.current || (chunks[0] && chunks[0].type) || 'audio/mp4';
+                    const blob = new Blob(chunks, { type: actualType });
+                    setAudioBlob(blob);
+                } catch (e) {
+                    console.warn('Falling back to default blob type due to error:', e);
+                    const blob = new Blob(chunks);
+                    setAudioBlob(blob);
+                }
             };
 
             mediaRecorderRef.current = mediaRecorder;
             mediaRecorder.start();
             setIsRecording(true);
-            setRecordingTime(0); // Reset time to 0
+            setRecordingTime(0);
 
-            // Start timer
             timerRef.current = setInterval(() => {
                 setRecordingTime(prev => prev + 1);
             }, 1000);
 
         } catch (err) {
             console.error('Failed to start recording:', err);
-
             let errorMessage = 'שגיאה בהתחלת ההקלטה';
             if (err.message === 'MediaRecorder not supported') {
                 errorMessage = 'הדפדפן לא תומך בהקלטת קול. נסה דפדפן אחר או עדכן את הדפדפן הנוכחי.';
             } else {
                 errorMessage = `שגיאה בהתחלת ההקלטה: ${err.message}`;
             }
-
             setError(errorMessage);
         }
     }, [requestMicrophoneAccess, audioBlob]);
@@ -382,15 +448,40 @@ const VoiceRecorder = ({ onRecordingComplete, onClose }) => {
     }, [isRecording]);
 
     // Play/pause recorded audio
-    const togglePlayback = useCallback(() => {
+    const togglePlayback = useCallback(async () => {
         if (!audioElementRef.current) return;
 
+        const audioEl = audioElementRef.current;
+
         if (isPlaying) {
-            audioElementRef.current.pause();
+            audioEl.pause();
         } else {
-            audioElementRef.current.play();
+            try {
+                // Ensure the audio is ready to play
+                if (audioEl.readyState < 2) {
+                    await new Promise((resolve, reject) => {
+                        const onCanPlay = () => {
+                            audioEl.removeEventListener('canplay', onCanPlay);
+                            audioEl.removeEventListener('error', onError);
+                            resolve();
+                        };
+                        const onError = () => {
+                            audioEl.removeEventListener('canplay', onCanPlay);
+                            audioEl.removeEventListener('error', onError);
+                            reject(new Error('Audio failed to load'));
+                        };
+                        audioEl.addEventListener('canplay', onCanPlay);
+                        audioEl.addEventListener('error', onError);
+                    });
+                }
+
+                await audioEl.play();
+            } catch (error) {
+                console.error('Failed to play audio:', error);
+                // Reset playing state on error
+                setIsPlaying(false);
+            }
         }
-        setIsPlaying(!isPlaying);
     }, [isPlaying]);
 
     // Discard recording and close
@@ -430,21 +521,63 @@ const VoiceRecorder = ({ onRecordingComplete, onClose }) => {
     // Handle audio element events
     useEffect(() => {
         if (audioBlob) {
-            // Clean up previous audio element
-            if (audioElementRef.current) {
-                audioElementRef.current.pause();
-                audioElementRef.current.removeEventListener('ended', () => setIsPlaying(false));
-                audioElementRef.current.removeEventListener('pause', () => setIsPlaying(false));
-                audioElementRef.current.removeEventListener('play', () => setIsPlaying(true));
-                audioElementRef.current = null;
-            }
+            const objectUrl = URL.createObjectURL(audioBlob);
+            const el = hiddenPlaybackRef.current;
+            if (el) {
+                // Clean up previous audio
+                el.pause();
+                el.currentTime = 0;
 
-            // Create new audio element for the new recording
-            const audioElement = new Audio(URL.createObjectURL(audioBlob));
-            audioElement.addEventListener('ended', () => setIsPlaying(false));
-            audioElement.addEventListener('pause', () => setIsPlaying(false));
-            audioElement.addEventListener('play', () => setIsPlaying(true));
-            audioElementRef.current = audioElement;
+                // Set new source
+                el.src = objectUrl;
+
+                // Set up event listeners
+                const onEnded = () => setIsPlaying(false);
+                const onPause = () => setIsPlaying(false);
+                const onPlay = () => setIsPlaying(true);
+                const onError = (e) => {
+                    console.error('Audio playback error:', e);
+                    setIsPlaying(false);
+                };
+
+                // Remove any existing listeners
+                el.removeEventListener('ended', onEnded);
+                el.removeEventListener('pause', onPause);
+                el.removeEventListener('play', onPlay);
+                el.removeEventListener('error', onError);
+
+                // Add new listeners
+                el.addEventListener('ended', onEnded);
+                el.addEventListener('pause', onPause);
+                el.addEventListener('play', onPlay);
+                el.addEventListener('error', onError);
+
+                // Load the audio
+                try {
+                    el.load();
+                } catch (error) {
+                    console.warn('Audio load failed:', error);
+                }
+
+                audioElementRef.current = el;
+            }
+            return () => {
+                URL.revokeObjectURL(objectUrl);
+                if (el) {
+                    el.pause();
+                    el.currentTime = 0;
+                    el.src = '';
+                }
+            };
+        } else {
+            // Clear audio element when no blob
+            const el = hiddenPlaybackRef.current;
+            if (el) {
+                el.pause();
+                el.currentTime = 0;
+                el.src = '';
+            }
+            audioElementRef.current = null;
         }
     }, [audioBlob]);
 
@@ -694,6 +827,13 @@ const VoiceRecorder = ({ onRecordingComplete, onClose }) => {
                             />
                         </div>
                     )}
+
+                    {/* Hidden audio element for playback */}
+                    <audio
+                        ref={hiddenPlaybackRef}
+                        style={{ display: 'none' }}
+                        preload="none"
+                    />
                 </motion.div>
             </motion.div>
         </AnimatePresence>

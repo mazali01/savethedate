@@ -146,7 +146,7 @@ const InitialQuestion = ({ onComing, onNotComing, isSubmitting }) => {
 
                     <Typography variant="caption" sx={{ color: '#999', fontSize: 12, mt: 1 }}>
                         * התנאים הללו בתוקף לכל אורך האירוע.
-                        ביטול ההסכם יגרור חיוב בהרמת צ׳ייסר עם החתן והכלה
+                        הפרת ההסכם יגרור חיוב בהרמת צ׳ייסר עם החתן והכלה
                         🥃
                     </Typography>
                 </Box>
