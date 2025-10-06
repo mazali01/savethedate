@@ -1,7 +1,8 @@
 import React, { useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import './WelcomeLanding.css';
-import { ArrowBack, ArrowForward } from '@mui/icons-material';
+import { ArrowBack } from '@mui/icons-material';
+import { useRsvpResponse } from '../api/rsvp';
 
 const SLIDE_THRESHOLD = 120; // px
 
@@ -11,6 +12,7 @@ function WelcomeLanding() {
     const [slideX, setSlideX] = useState(0);
     const [sliding, setSliding] = useState(false);
     const startXRef = useRef(null);
+    const { data: rsvp } = useRsvpResponse(userId);
 
     // Touch events
     const handleTouchStart = (e) => {
@@ -25,7 +27,11 @@ function WelcomeLanding() {
     const handleTouchEnd = () => {
         setSliding(false);
         if (slideX > SLIDE_THRESHOLD) {
-            navigate(`/rsvp/${userId}`);
+            if (rsvp?.isAttending) {
+                navigate(`/user/${userId}`);
+            } else {
+                navigate(`/rsvp/${userId}`);
+            }
         } else {
             setSlideX(0);
         }
@@ -44,7 +50,11 @@ function WelcomeLanding() {
     const handleMouseUp = () => {
         setSliding(false);
         if (slideX > SLIDE_THRESHOLD) {
-            navigate(`/rsvp/${userId}`);
+            if (rsvp?.isAttending) {
+                navigate(`/user/${userId}`);
+            } else {
+                navigate(`/rsvp/${userId}`);
+            }
         } else {
             setSlideX(0);
         }

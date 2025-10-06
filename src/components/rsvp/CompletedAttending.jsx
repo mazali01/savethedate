@@ -11,6 +11,8 @@ import {
     Cancel as CancelIcon,
 } from '@mui/icons-material';
 import CalendarButtons from '../AddCalendar';
+import './GlassyButton.css';
+import './CompletedAttending.css';
 
 const weddingEvent = {
     title: 'חתונת מזל וערן',
@@ -77,21 +79,43 @@ const CompletedAttending = ({
                     </Box>
 
                     {shouldShowWeddingSiteButton &&
-                        <Button
-                            variant="contained"
-                            dir='ltr'
-                            onClick={handleGoToWeddingMenu}
-                            sx={{
-                                minWidth: 200,
-                                py: 2,
-                                backgroundColor: '#2e7d32',
-                                '&:hover': {
-                                    backgroundColor: '#1b5e20',
-                                },
-                            }}
-                        >
-                            לאתר החתונה
-                        </Button>
+                        <>
+                            <Box className="wedding-button-container">
+                                <div className="arrow-left"></div>
+                                <Button
+                                    variant="contained"
+                                    dir='ltr'
+                                    onClick={handleGoToWeddingMenu}
+                                    className="glassy-button"
+                                    sx={{ minWidth: 200, py: 2, boxShadow: 'none', background: 'none' }}
+                                >
+                                    לאתר החתונה
+                                </Button>
+                                <div className="arrow-right"></div>
+                            </Box>
+
+                            {/* Promo section */}
+                            <Box
+                                className="promo-section"
+                                dir="rtl"
+                                sx={{
+                                    mt: 3,
+                                    pt: 2,
+                                    borderTop: '1px solid rgba(232, 180, 200, 0.3)',
+                                    fontSize: '0.85rem',
+                                    color: '#666',
+                                    textAlign: 'center'
+                                }}
+                            >
+                                <span style={{ marginLeft: '6px' }}>📸</span>
+                                אלבום משותף
+                                <span style={{ margin: '0 8px' }}>•</span>
+                                <span style={{ marginLeft: '6px' }}>🚗</span>
+                                שיתוף טרמפים
+                                <span style={{ margin: '0 8px' }}>•</span>
+                                ועוד...
+                            </Box>
+                        </>
                     }
                 </Paper>
             </Fade>
