@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
+import axios from 'axios';
 import {
     Box,
     Paper,
@@ -37,7 +38,8 @@ import {
     CheckBox as CheckBoxIcon,
     CheckBoxOutlineBlank as CheckBoxBlankIcon,
     Sms as SmsIcon,
-    Sync as SyncIcon
+    Sync as SyncIcon,
+    WhatsApp as WhatsAppIcon
 } from '@mui/icons-material';
 
 import { hasCompletedRsvp, getAllRsvpResponses } from '../services/rsvpService';
@@ -82,6 +84,7 @@ const UnifiedUserManagement = () => {
     // SMS states
     const [testSmsDialog, setTestSmsDialog] = useState(false);
     const [bulkSendDialog, setBulkSendDialog] = useState(false);
+    const [whatsappDialog, setWhatsappDialog] = useState(false);
     const [testPhoneNumber, setTestPhoneNumber] = useState('');
 
     // Filters and config
@@ -412,6 +415,38 @@ const UnifiedUserManagement = () => {
         }
     };
 
+    const handleWhatsAppSend = async () => {
+        try {
+            setSending(true);
+            setError('');
+
+            const usersToSend = Array.from(selectedUsers)
+                .map(id => users.find(u => u.id === id))
+                .filter(u => u && u.phoneNumber);
+
+            const response = await axios.post('http://localhost:3001/send', {
+                users: usersToSend.map(u => ({
+                    id: u.id,
+                    name: u.name,
+                    phoneNumber: u.phoneNumber
+                }))
+            });
+
+            const { success, failed } = response.data;
+            setSuccess(`נשלח בהצלחה: ${success.length}, נכשלו: ${failed.length}`);
+
+            if (failed.length > 0) {
+                console.log('Failed messages:', failed);
+            }
+
+            setWhatsappDialog(false);
+        } catch (error) {
+            setError('שגיאה בשליחת הודעות WhatsApp: ' + (error.response?.data?.error || error.message));
+        } finally {
+            setSending(false);
+        }
+    };
+
     const getFilteredUsers = () => {
         switch (currentTab) {
             case 1:
@@ -559,6 +594,23 @@ const UnifiedUserManagement = () => {
                             }}
                         >
                             בדיקת SMS
+                        </Button>
+
+                        <Button
+                            variant="outlined"
+                            startIcon={<WhatsAppIcon />}
+                            onClick={() => setWhatsappDialog(true)}
+                            disabled={selectedUsers.size === 0}
+                            sx={{
+                                color: '#25D366',
+                                borderColor: '#25D366',
+                                '&:hover': {
+                                    borderColor: '#128C7E',
+                                    bgcolor: 'rgba(37, 211, 102, 0.04)'
+                                }
+                            }}
+                        >
+                            WhatsApp ({selectedUsers.size})
                         </Button>
 
                         <Button
@@ -927,6 +979,45 @@ const UnifiedUserManagement = () => {
                         sx={{ bgcolor: '#2e7d32', '&:hover': { bgcolor: '#1b5e20' } }}
                     >
                         {sending ? 'שולח...' : 'שלח בדיקה'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* WhatsApp Send Dialog */}
+            <Dialog
+                open={whatsappDialog}
+                onClose={() => setWhatsappDialog(false)}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <WhatsAppIcon sx={{ color: '#25D366' }} />
+                    שליחת הודעות WhatsApp
+                </DialogTitle>
+                <DialogContent>
+                    <Alert severity="info" sx={{ mb: 2 }}>
+                        הודעות יישלחו ל-{selectedUsers.size} מוזמנים שנבחרו
+                    </Alert>
+                    <Typography variant="body2" gutterBottom>
+                        כל מוזמן יקבל הודעה אישית עם קישור ייחודי לאישור הגעה.
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                        ⚠️ וודא ששרת WhatsApp פועל: <code>node scripts/whatsapp-server.js</code>
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setWhatsappDialog(false)}>ביטול</Button>
+                    <Button
+                        onClick={handleWhatsAppSend}
+                        variant="contained"
+                        startIcon={<WhatsAppIcon />}
+                        disabled={sending}
+                        sx={{
+                            bgcolor: '#25D366',
+                            '&:hover': { bgcolor: '#128C7E' }
+                        }}
+                    >
+                        {sending ? 'שולח...' : `שלח ל-${selectedUsers.size} מוזמנים`}
                     </Button>
                 </DialogActions>
             </Dialog>
