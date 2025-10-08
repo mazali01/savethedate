@@ -90,3 +90,55 @@ export const deleteInvitedUser = async (userId) => {
         throw error;
     }
 };
+
+// Mark SMS as sent for a user
+export const markSmsSent = async (userId) => {
+    try {
+        const userRef = doc(db, COLLECTION_NAME, userId);
+        await updateDoc(userRef, {
+            smsSent: true,
+            smsSentAt: new Date(),
+            updatedAt: new Date()
+        });
+    } catch (error) {
+        console.error('Error marking SMS as sent:', error);
+        throw error;
+    }
+};
+
+// Mark WhatsApp as sent for a user
+export const markWhatsAppSent = async (userId) => {
+    try {
+        const userRef = doc(db, COLLECTION_NAME, userId);
+        await updateDoc(userRef, {
+            whatsappSent: true,
+            whatsappSentAt: new Date(),
+            updatedAt: new Date()
+        });
+    } catch (error) {
+        console.error('Error marking WhatsApp as sent:', error);
+        throw error;
+    }
+};
+
+// Mark SMS as sent for multiple users
+export const markBulkSmsSent = async (userIds) => {
+    try {
+        const promises = userIds.map(userId => markSmsSent(userId));
+        await Promise.all(promises);
+    } catch (error) {
+        console.error('Error marking bulk SMS as sent:', error);
+        throw error;
+    }
+};
+
+// Mark WhatsApp as sent for multiple users
+export const markBulkWhatsAppSent = async (userIds) => {
+    try {
+        const promises = userIds.map(userId => markWhatsAppSent(userId));
+        await Promise.all(promises);
+    } catch (error) {
+        console.error('Error marking bulk WhatsApp as sent:', error);
+        throw error;
+    }
+};

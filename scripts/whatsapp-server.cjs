@@ -41,42 +41,105 @@ const formatPhone = (phone) => {
     return `972${cleaned}@c.us`;
 };
 
-// Send messages endpoint
+// Send messages endpoint with progress updates
 app.post('/send', async (req, res) => {
-    try {
-        const { users } = req.body;
-        const results = { success: [], failed: [] };
+    const { users } = req.body;
 
-        for (const user of users) {
+    // Set headers for streaming
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    const results = { success: [], failed: [] };
+    const total = users.length;
+
+    try {
+        for (let i = 0; i < users.length; i++) {
+            const user = users[i];
+
             try {
                 const chatId = formatPhone(user.phoneNumber);
                 const message = `היי ${user.name} 👋
 
-זיכרון ידידותי שעדיין לא קיבלנו אישור הגעה ממך לחתונה שלנו! 💍
+מזכירים לך שהחתונה שלנו מתקרבת! 💍✨
+📅 תאריך: 16.10
 
-נשמח מאוד אם תוכל/י לאשר את הגעתך בקישור הבא:
-https://your-site.com/${user.id}
+נשמח מאוד אם תוכל/י לאשר את הגעתך דרך הקישור:
+https://fistuk.vercel.app/${user.id}
 
-מחכים לך! ❤️
+⚠️ חשוב: כדי שהקישור יהיה לחיץ, פשוט הגב/י לכאן עם כל תשובה (למשל: "קיבלתי" 😊)
+
+באתר מחכות לך עוד הפתעות שווות שהכנו במיוחד:
+🚗 ארגון טרמפים משותפים
+📸 גלריית תמונות חיה
+💌 ברכות ואיחולים
+🎵 בחירת שירים לרחבת הריקודים
+🎁 מתנות דיגיטליות
+💫 פינת היכרויות לרווקים/ות 😉
+...ועוד כמה הפתעות! 🎉
+
+מחכים לך בשמחה! ❤️
 מזל וערן`;
 
                 const numberId = await client.getNumberId(chatId.replace('@c.us', ''));
                 if (!numberId) {
                     results.failed.push({ ...user, error: 'Not on WhatsApp' });
+                    // Send progress update
+                    res.write(`data: ${JSON.stringify({
+                        type: 'progress',
+                        current: i + 1,
+                        total,
+                        status: 'failed',
+                        user: user.name,
+                        error: 'Not on WhatsApp'
+                    })}\n\n`);
                     continue;
                 }
 
                 await client.sendMessage(numberId._serialized, message);
                 results.success.push(user);
-                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                // Send progress update
+                res.write(`data: ${JSON.stringify({
+                    type: 'progress',
+                    current: i + 1,
+                    total,
+                    status: 'success',
+                    user: user.name
+                })}\n\n`);
+
+                // Random delay between 3-8 seconds to avoid spam detection
+                const randomDelay = Math.floor(Math.random() * 5000) + 3000;
+                await new Promise(resolve => setTimeout(resolve, randomDelay));
+
             } catch (error) {
                 results.failed.push({ ...user, error: error.message });
+
+                // Send progress update
+                res.write(`data: ${JSON.stringify({
+                    type: 'progress',
+                    current: i + 1,
+                    total,
+                    status: 'failed',
+                    user: user.name,
+                    error: error.message
+                })}\n\n`);
             }
         }
 
-        res.json(results);
+        // Send final results
+        res.write(`data: ${JSON.stringify({
+            type: 'complete',
+            results
+        })}\n\n`);
+
+        res.end();
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.write(`data: ${JSON.stringify({
+            type: 'error',
+            error: error.message
+        })}\n\n`);
+        res.end();
     }
 });
 

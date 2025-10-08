@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
-import axios from 'axios';
 import {
     Box,
     Paper,
@@ -47,7 +46,10 @@ import {
     getInvitedUsers,
     createInvitedUser,
     updateInvitedUser,
-    deleteInvitedUser
+    deleteInvitedUser,
+    markSmsSent,
+    markBulkSmsSent,
+    markBulkWhatsAppSent
 } from '../services/invitedUsersService';
 import {
     generateInvitationLink,
@@ -102,6 +104,7 @@ const UnifiedUserManagement = () => {
 
     useEffect(() => {
         loadRsvpStatuses();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [users]);
 
     const loadUsers = async () => {
@@ -338,9 +341,14 @@ const UnifiedUserManagement = () => {
             setSending(true);
             const { message } = generateInvitationLink(user.id, user.name);
             await sendSMS(user.phoneNumber, message);
+
+            // Mark SMS as sent in Firebase
+            await markSmsSent(user.id);
+
             setSuccess(`הזמנה נשלחה בהצלחה ל-${user.name}`);
 
-            // Refresh SMS balance after sending
+            // Refresh users and SMS balance after sending
+            loadUsers();
             loadSmsBalance();
         } catch {
             setError(`שגיאה בשליחת הזמנה ל-${user.name}`);
@@ -367,12 +375,19 @@ const UnifiedUserManagement = () => {
                 setSendProgress(progress);
             });
 
+            // Mark SMS as sent for successful sends
+            const successfulUserIds = results.successful.map(inv => inv.userId);
+            if (successfulUserIds.length > 0) {
+                await markBulkSmsSent(successfulUserIds);
+            }
+
             setSuccess(`נשלחו ${results.successful.length} הזמנות בהצלחה מתוך ${results.total}`);
             if (results.failed.length > 0) {
                 setError(`${results.failed.length} שליחות נכשלו`);
             }
 
-            // Refresh SMS balance after sending
+            // Refresh users and SMS balance after sending
+            loadUsers();
             loadSmsBalance();
 
             setSelectedUsers(new Set());
@@ -419,31 +434,91 @@ const UnifiedUserManagement = () => {
         try {
             setSending(true);
             setError('');
+            setWhatsappDialog(false);
 
             const usersToSend = Array.from(selectedUsers)
                 .map(id => users.find(u => u.id === id))
                 .filter(u => u && u.phoneNumber);
 
-            const response = await axios.post('http://localhost:3001/send', {
-                users: usersToSend.map(u => ({
-                    id: u.id,
-                    name: u.name,
-                    phoneNumber: u.phoneNumber
-                }))
+            // Use fetch with POST for SSE
+            const response = await fetch('http://localhost:3001/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    users: usersToSend.map(u => ({
+                        id: u.id,
+                        name: u.name,
+                        phoneNumber: u.phoneNumber
+                    }))
+                })
             });
 
-            const { success, failed } = response.data;
-            setSuccess(`נשלח בהצלחה: ${success.length}, נכשלו: ${failed.length}`);
-
-            if (failed.length > 0) {
-                console.log('Failed messages:', failed);
+            if (!response.ok) {
+                throw new Error('Failed to connect to WhatsApp server');
             }
 
-            setWhatsappDialog(false);
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+
+            const successfulIds = [];
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n\n');
+                buffer = lines.pop() || '';
+
+                for (const line of lines) {
+                    if (!line.trim() || !line.startsWith('data: ')) continue;
+
+                    try {
+                        const data = JSON.parse(line.substring(6));
+
+                        if (data.type === 'progress') {
+                            setSendProgress({
+                                current: data.current,
+                                total: data.total,
+                                percentage: Math.round((data.current / data.total) * 100)
+                            });
+
+                            if (data.status === 'success') {
+                                successfulIds.push(data.user);
+                            }
+                        } else if (data.type === 'complete') {
+                            // Mark WhatsApp as sent for successful sends
+                            const successUserIds = data.results.success.map(u => u.id);
+                            if (successUserIds.length > 0) {
+                                await markBulkWhatsAppSent(successUserIds);
+                                await loadUsers();
+                            }
+
+                            setSuccess(`נשלח בהצלחה ל-${data.results.success.length} מוזמנים, נכשלו: ${data.results.failed.length}`);
+                            if (data.results.failed.length > 0) {
+                                console.log('Failed messages:', data.results.failed);
+                            }
+                            setSending(false);
+                            setSendProgress({ current: 0, total: 0, percentage: 0 });
+                            setSelectedUsers(new Set());
+                        } else if (data.type === 'error') {
+                            setError('שגיאה בשליחת הודעות WhatsApp: ' + data.error);
+                            setSending(false);
+                            setSendProgress({ current: 0, total: 0, percentage: 0 });
+                        }
+                    } catch (parseError) {
+                        console.error('Error parsing SSE data:', parseError);
+                    }
+                }
+            }
+
         } catch (error) {
-            setError('שגיאה בשליחת הודעות WhatsApp: ' + (error.response?.data?.error || error.message));
-        } finally {
+            setError('שגיאה בחיבור לשרת WhatsApp. וודא שהשרת פועל: ' + error.message);
             setSending(false);
+            setSendProgress({ current: 0, total: 0, percentage: 0 });
         }
     };
 
@@ -461,6 +536,8 @@ const UnifiedUserManagement = () => {
                     const rsvp = rsvpResponses.get(u.id);
                     return rsvp && !rsvp.isAttending;
                 });
+            case 4:
+                return users.filter(u => !u.smsSent && !u.whatsappSent);
             default:
                 return users;
         }
@@ -655,6 +732,10 @@ const UnifiedUserManagement = () => {
                             label={`לא מגיעים (${getNotAttendingCount()})`}
                             sx={{ color: 'error.main' }}
                         />
+                        <Tab
+                            label={`לא נשלחה הזמנה (${users.filter(u => !u.smsSent && !u.whatsappSent).length})`}
+                            sx={{ color: 'text.secondary' }}
+                        />
                     </Tabs>
                 </Paper>
 
@@ -678,6 +759,17 @@ const UnifiedUserManagement = () => {
                         </Typography>
                         <Typography variant="body2" color="primary.main">
                             סה"כ אורחים מגיעים: <strong>{getTotalGuestCount()}</strong>
+                        </Typography>
+                    </Box>
+                    <Box display="flex" gap={4} flexWrap="wrap" sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+                        <Typography variant="body2" color="info.main">
+                            📱 SMS נשלחו: <strong>{users.filter(u => u.smsSent).length}</strong>
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: '#25D366' }}>
+                            💬 WhatsApp נשלחו: <strong>{users.filter(u => u.whatsappSent).length}</strong>
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                            🔔 לא נשלחה הזמנה: <strong>{users.filter(u => !u.smsSent && !u.whatsappSent).length}</strong>
                         </Typography>
                     </Box>
                 </Paper>
@@ -726,6 +818,8 @@ const UnifiedUserManagement = () => {
                             <TableCell>טלפון</TableCell>
                             <TableCell align="center">סטטוס נוכחות</TableCell>
                             <TableCell align="center">מספר מגיעים</TableCell>
+                            <TableCell align="center">SMS נשלח</TableCell>
+                            <TableCell align="center">WhatsApp נשלח</TableCell>
                             <TableCell align="center">פעולות</TableCell>
                         </TableRow>
                     </TableHead>
@@ -779,6 +873,43 @@ const UnifiedUserManagement = () => {
                                         )}
                                     </TableCell>
                                     <TableCell align="center">
+                                        {user.smsSent ? (
+                                            <Chip
+                                                icon={<SmsIcon />}
+                                                label={user.smsSentAt ? new Date(user.smsSentAt.seconds * 1000).toLocaleDateString('he-IL') : 'נשלח'}
+                                                color="success"
+                                                size="small"
+                                                variant="outlined"
+                                            />
+                                        ) : (
+                                            <Chip
+                                                label="לא נשלח"
+                                                size="small"
+                                                variant="outlined"
+                                            />
+                                        )}
+                                    </TableCell>
+                                    <TableCell align="center">
+                                        {user.whatsappSent ? (
+                                            <Chip
+                                                icon={<WhatsAppIcon />}
+                                                label={user.whatsappSentAt ? new Date(user.whatsappSentAt.seconds * 1000).toLocaleDateString('he-IL') : 'נשלח'}
+                                                sx={{
+                                                    borderColor: '#25D366',
+                                                    color: '#25D366'
+                                                }}
+                                                size="small"
+                                                variant="outlined"
+                                            />
+                                        ) : (
+                                            <Chip
+                                                label="לא נשלח"
+                                                size="small"
+                                                variant="outlined"
+                                            />
+                                        )}
+                                    </TableCell>
+                                    <TableCell align="center">
                                         <IconButton
                                             onClick={() => handleEdit(user)}
                                             size="small"
@@ -816,7 +947,7 @@ const UnifiedUserManagement = () => {
                         })}
                         {filteredUsers.length === 0 && (
                             <TableRow>
-                                <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
+                                <TableCell colSpan={8} align="center" sx={{ py: 4 }}>
                                     <Typography variant="body2" color="text.secondary">
                                         אין מוזמנים בקטגוריה זו
                                     </Typography>
