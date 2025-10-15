@@ -5,3 +5,4 @@ export * from './singles';
 export * from './carpool';
 export * from './invitedUsers';
 export * from './sms';
+export * from './menu';
