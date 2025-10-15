@@ -162,7 +162,7 @@ const SongSearchBar = ({ onAddSong, isProposing, existingActiveSpotifyIds = [] }
                                 {searchResults.map((track, index) => {
                                     const alreadyExists = existingActiveSpotifyIds.includes(track.id);
                                     return (
-                                        <ListItem key={`${track.id}-${index}`} disablePadding>
+                                        <ListItem key={`${track.id}-${index}`} disablePadding sx={{ position: 'relative' }}>
                                             <ListItemButton
                                                 onClick={() => !alreadyExists && handleAddSongWithSearch(track)}
                                                 sx={{
@@ -239,8 +239,14 @@ const SongSearchBar = ({ onAddSong, isProposing, existingActiveSpotifyIds = [] }
                                                     left: 12,
                                                     top: '50%',
                                                     transform: 'translateY(-50%)',
-                                                    fontSize: '0.7rem',
-                                                    color: 'rgba(255,255,255,0.6)'
+                                                    fontSize: '0.75rem',
+                                                    fontWeight: 'bold',
+                                                    color: '#ffc107',
+                                                    backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                                                    padding: '4px 8px',
+                                                    borderRadius: '4px',
+                                                    border: '1px solid rgba(255, 193, 7, 0.3)',
+                                                    direction: 'rtl'
                                                 }}>
                                                     כבר קיים
                                                 </Box>

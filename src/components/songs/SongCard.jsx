@@ -7,21 +7,23 @@ import {
     Fade,
     IconButton,
     Chip,
-    CircularProgress
+    CircularProgress,
+    Button
 } from '@mui/material';
 import {
     PlayArrow,
     Pause,
-    Delete
+    Delete,
+    CheckCircle
 } from '@mui/icons-material';
 import FistukRating from '../RatingSlider';
-import CountdownTimer from '../CountdownTimer';
 import songService from '../../services/songService';
 
 const SongCard = ({
     song,
     index,
     userId,
+    userName,
     isPlaying,
     userRating,
     onPlayPause,
@@ -34,6 +36,7 @@ const SongCard = ({
 }) => {
     const [imageLoaded, setImageLoaded] = useState(false);
     const isMySong = song.proposedBy?.userId === userId;
+    const isDJ = userName === 'דיגיי';
     // Support both snake_case and legacy camelCase
     const effectivePreviewUrl = song.preview_url || song.previewUrl || '';
 
@@ -253,13 +256,6 @@ const SongCard = ({
                                 </IconButton>
                             </Box>
                         </Box>
-                        {/* Countdown Timer */}
-                        {song.expiresAt && (
-                            <CountdownTimer
-                                expiresAt={song.expiresAt}
-                                onExpired={handleExpired}
-                            />
-                        )}
                     </Box>
                 </Box>
 
@@ -274,7 +270,37 @@ const SongCard = ({
                         background: '#00ffff'
                     }} />
                 )}
-                {isMySong && (
+                {/* DJ Played Button */}
+                {isDJ && (
+                    <Button
+                        size="small"
+                        onClick={onRemove}
+                        disabled={isRemoving}
+                        startIcon={isRemoving ? <CircularProgress size={16} /> : <CheckCircle sx={{ ml: 1 }} />}
+                        sx={{
+                            position: 'absolute',
+                            top: 8,
+                            right: 8,
+                            color: '#4caf50',
+                            backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                            border: '1px solid rgba(76, 175, 80, 0.3)',
+                            '&:hover': {
+                                background: 'rgba(76, 175, 80, 0.2)',
+                                borderColor: 'rgba(76, 175, 80, 0.5)'
+                            },
+                            '&:disabled': {
+                                color: 'rgba(76, 175, 80, 0.3)',
+                                borderColor: 'rgba(76, 175, 80, 0.1)'
+                            },
+                            fontSize: '0.75rem',
+                            padding: '4px 8px'
+                        }}
+                    >
+                        נוגן
+                    </Button>
+                )}
+                {/* Remove Button for Song Owner (not DJ) */}
+                {isMySong && !isDJ && (
                     <IconButton
                         size="small"
                         onClick={onRemove}

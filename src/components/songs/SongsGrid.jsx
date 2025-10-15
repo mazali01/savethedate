@@ -6,6 +6,7 @@ import songService from '../../services/songService';
 const SongsGrid = ({
     songs,
     userId,
+    userName,
     playingTrack,
     onPlayPause,
     onRating,
@@ -41,6 +42,7 @@ const SongsGrid = ({
                     song={song}
                     index={index}
                     userId={userId}
+                    userName={userName}
                     isPlaying={playingTrack === song.id}
                     userRating={songService.getUserRatingForSong(song, userId)}
                     onPlayPause={onPlayPause}

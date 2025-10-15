@@ -32,16 +32,6 @@ const SongsPageHeader = () => {
                 }}>
                     !ואולי הוא יושמע בחתונה
                 </Typography>
-                <Typography variant="caption" sx={{
-                    color: 'rgba(255, 255, 255, 0.7)',
-                    fontSize: '0.6rem',
-                    display: 'block',
-                    direction: 'rtl',
-                    textAlign: 'center',
-                    fontFamily: 'inherit'
-                }}>
-                    הצעות נמחקות אחרי 15 דקות
-                </Typography>
             </Box>
         </Box>
     );

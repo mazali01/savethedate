@@ -13,6 +13,7 @@ import LoadingState from '../components/songs/LoadingState';
 import useSongManagement from '../hooks/useSongs';
 import songService from '../services/songService';
 import { getSortedSongs } from '../utils/songUtils';
+import { getInvitedUserById } from '../services/invitedUsersService';
 
 const FuturisticSongsPage = () => {
     const { userId } = useParams();
@@ -20,7 +21,26 @@ const FuturisticSongsPage = () => {
     const [playingTrack, setPlayingTrack] = useState(null);
     const [audioInitialized, setAudioInitialized] = useState(false);
     const [isPreviewLoading, setIsPreviewLoading] = useState(false);
+    const [userName, setUserName] = useState('');
     const audioRef = useRef(null);
+
+    // Fetch user name first
+    useEffect(() => {
+        const fetchUserName = async () => {
+            try {
+                const user = await getInvitedUserById(userId);
+                if (user && user.name) {
+                    setUserName(user.name);
+                }
+            } catch (error) {
+                console.error('Error fetching user name:', error);
+            }
+        };
+
+        if (userId) {
+            fetchUserName();
+        }
+    }, [userId]);
 
     // Use React Query hooks for song management
     const {
@@ -37,12 +57,7 @@ const FuturisticSongsPage = () => {
         handleRating,
         handleRemoveSong,
         refetchSongs
-    } = useSongManagement(userId);
-
-    // Initialize song service (just ensures Firebase collections exist)
-    useEffect(() => {
-        // No need to call songService.initializeMockData() as it's handled by Firebase
-    }, [userId]);
+    } = useSongManagement(userId, userName);
 
     // Cleanup audio when component unmounts
     useEffect(() => {
@@ -187,10 +202,7 @@ const FuturisticSongsPage = () => {
                 <SongSearchBar
                     onAddSong={handleAddSong}
                     isProposing={isProposing}
-                    existingActiveSpotifyIds={songs.filter(s => {
-                        if (!s.expiresAt) return true;
-                        return new Date(s.expiresAt).getTime() > Date.now();
-                    }).map(s => s.spotifyId)}
+                    existingActiveSpotifyIds={songs.filter(s => s.spotifyId).map(s => s.spotifyId)}
                 />
 
                 {/* Main Content */}
@@ -221,6 +233,7 @@ const FuturisticSongsPage = () => {
                         <SongsGrid
                             songs={sortedSongs}
                             userId={userId}
+                            userName={userName}
                             playingTrack={playingTrack}
                             onPlayPause={handlePlayPause}
                             onRating={handleSongRating}

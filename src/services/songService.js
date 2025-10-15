@@ -67,7 +67,6 @@ class SongService {
     // Get all songs from Firebase
     async getAllSongs() {
         try {
-            console.log('🗄️ Fetching all songs from Firebase...');
             const songsQuery = query(
                 collection(db, this.songsCollection),
                 orderBy('createdAt', 'desc') // Order by creation time (newest first)
@@ -92,13 +91,6 @@ class SongService {
                 }
             });
 
-            console.log('🗄️ Fetched songs:', songs.length, songs.map(s => ({
-                name: s.name,
-                artist: s.artist,
-                id: s.id,
-                expiresAt: s.expiresAt,
-                expiresAtType: typeof s.expiresAt
-            })));
             return songs;
         } catch (error) {
             console.error('Error fetching songs:', error);
@@ -160,15 +152,9 @@ class SongService {
         try {
             console.log('🎵 proposeSong called with:', { songData, userId, userName });
 
-            // Check if active (non-expired) song already exists
+            // Check if song already exists (songs no longer expire)
             const existingSongs = await this.getAllSongs();
-            const now = Date.now();
-            const existingSong = existingSongs.find(song => {
-                const exp = song.expiresAt ? new Date(song.expiresAt).getTime() : null;
-                const isExpired = exp && exp < now;
-                if (isExpired) return false; // ignore expired songs to allow re-adding
-                return song.spotifyId === songData.id;
-            });
+            const existingSong = existingSongs.find(song => song.spotifyId === songData.id);
             if (existingSong) {
                 console.log('❌ Song already exists:', existingSong);
                 throw new Error('This song has already been proposed');
@@ -225,8 +211,8 @@ class SongService {
                 },
                 voters: [], // Keep for backward compatibility
                 reactors: {},
-                createdAt: serverTimestamp(),
-                expiresAt: new Date(Date.now() + 15 * 60 * 1000) // 15 minutes from now as JS Date
+                createdAt: serverTimestamp()
+                // No longer set expiresAt - songs stay forever
             };
 
             console.log('💾 Saving new song to Firebase:', newSong);
@@ -240,8 +226,8 @@ class SongService {
             const returnSong = {
                 id: docRef.id,
                 ...newSong,
-                createdAt: new Date(),
-                expiresAt: newSong.expiresAt // Keep the original Date object
+                createdAt: new Date()
+                // No expiresAt field
             };
 
             console.log('✅ Returning song:', returnSong);
@@ -329,8 +315,8 @@ class SongService {
         }
     }
 
-    // Remove song from a song (only by proposer)
-    async removeSong(songId, userId) {
+    // Remove song (by proposer or DJ)
+    async removeSong(songId, userId, userName = null) {
         try {
             const songRef = doc(db, this.songsCollection, songId);
             const songDoc = await getDoc(songRef);
@@ -340,7 +326,10 @@ class SongService {
             }
 
             const songData = songDoc.data();
-            if (songData.proposedBy?.userId !== userId) {
+
+            const isDJ = userName === 'דיגיי';
+            // Allow removal if user is the proposer OR if user is the DJ
+            if (songData.proposedBy?.userId !== userId && !isDJ) {
                 throw new Error('You can only remove songs you proposed');
             }
 
@@ -465,13 +454,8 @@ class SongService {
     async getUserProposalsCount(userId) {
         try {
             const songs = await this.getAllSongs();
-            const now = Date.now();
-            return songs.filter(song => {
-                if (song.proposedBy?.userId !== userId) return false;
-                if (!song.expiresAt) return true; // old songs without expiry count
-                const exp = new Date(song.expiresAt).getTime();
-                return exp > now; // only count active
-            }).length;
+            // Count all songs proposed by this user (songs no longer expire)
+            return songs.filter(song => song.proposedBy?.userId === userId).length;
         } catch (error) {
             console.error('Error getting user proposals count:', error);
             return 0;
@@ -496,15 +480,10 @@ class SongService {
         });
     }
 
-    // Get songs sorted by time remaining
+    // Get songs sorted by time remaining (DEPRECATED - songs no longer expire)
     async getSongsSortedByTimeRemaining() {
-        const songs = await this.getAllSongs();
-        const now = new Date();
-        return songs.sort((a, b) => {
-            const aTimeLeft = new Date(a.expiresAt) - now;
-            const bTimeLeft = new Date(b.expiresAt) - now;
-            return bTimeLeft - aTimeLeft; // Most time remaining first
-        });
+        // Return all songs sorted by rating instead
+        return this.getSongsSortedByRating();
     }
 
     // Get songs sorted by votes (legacy - keep for backward compatibility)
@@ -512,14 +491,9 @@ class SongService {
         return this.getSongsSortedByRating(); // Default to rating-based sorting
     }
 
-    // Get active songs (not expired)
+    // Get active songs (DEPRECATED - songs no longer expire, returns all songs)
     async getActiveSongs() {
-        const songs = await this.getAllSongs();
-        const now = new Date();
-        return songs.filter(song => {
-            if (!song.expiresAt) return true; // Keep old songs without expiry
-            return new Date(song.expiresAt) > now;
-        });
+        return this.getAllSongs();
     }
 
     // Get top 3 songs

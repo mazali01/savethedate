@@ -13,8 +13,8 @@ export const useSongs = (options = {}) => {
     return useQuery({
         queryKey: SONGS_QUERY_KEY,
         queryFn: songService.getAllSongs.bind(songService),
-        refetchInterval: 30000, // Poll every 30 seconds
-        staleTime: 10000, // Consider data fresh for 10 seconds
+        refetchInterval: 2000, // Poll every 2 seconds
+        staleTime: 1000, // Consider data fresh for 1 second
         refetchOnWindowFocus: true,
         refetchOnReconnect: true,
         ...options
@@ -27,8 +27,8 @@ export const useUserVotes = (userId, options = {}) => {
         queryKey: [...USER_VOTES_QUERY_KEY, userId],
         queryFn: () => songService.getUserVotes(userId),
         enabled: !!userId,
-        refetchInterval: 30000, // Poll every 30 seconds
-        staleTime: 10000,
+        refetchInterval: 2000, // Poll every 2 seconds
+        staleTime: 1000,
         refetchOnWindowFocus: true,
         ...options
     });
@@ -40,8 +40,8 @@ export const useUserReactions = (userId, options = {}) => {
         queryKey: [...USER_REACTIONS_QUERY_KEY, userId],
         queryFn: () => songService.getUserReactions(userId),
         enabled: !!userId,
-        refetchInterval: 30000,
-        staleTime: 10000,
+        refetchInterval: 2000,
+        staleTime: 1000,
         refetchOnWindowFocus: true,
         ...options
     });
@@ -53,8 +53,8 @@ export const useUserStats = (userId, options = {}) => {
         queryKey: [...USER_STATS_QUERY_KEY, userId],
         queryFn: () => songService.getUserStats(userId),
         enabled: !!userId,
-        refetchInterval: 30000,
-        staleTime: 10000,
+        refetchInterval: 2000,
+        staleTime: 1000,
         ...options
     });
 };
@@ -230,8 +230,8 @@ export const useRemoveSong = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ songId, userId }) =>
-            songService.removeSong(songId, userId),
+        mutationFn: ({ songId, userId, userName }) =>
+            songService.removeSong(songId, userId, userName),
         onSuccess: (removedSong, variables) => {
             // Remove song from cache
             queryClient.setQueryData(SONGS_QUERY_KEY, (oldSongs = []) => {
@@ -299,7 +299,7 @@ export const useAddReaction = () => {
 };
 
 // Combined hook that provides all song-related functionality
-export const useSongManagement = (userId) => {
+export const useSongManagement = (userId, userName = null) => {
     const songs = useSongs();
     const userVotes = useUserVotes(userId);
     const userReactions = useUserReactions(userId);
@@ -365,7 +365,7 @@ export const useSongManagement = (userId) => {
     };
 
     const handleRemoveSong = async (songId) => {
-        return removeSong.mutateAsync({ songId, userId });
+        return removeSong.mutateAsync({ songId, userId, userName });
     };
 
     return {
